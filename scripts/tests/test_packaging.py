@@ -13,7 +13,7 @@ class PackagingTests(PackagingCase):
     def test_bootloader_offsets_by_chip(self):
         index = self.package()
         self.assertEqual(self.offsets(self.board(index, "esp32"))["bootloader.bin"], 0x1000)
-        self.assertEqual(self.offsets(self.board(index, "sticks3"))["bootloader.bin"], 0)
+        self.assertEqual(self.offsets(self.board(index, "esp32s3"))["bootloader.bin"], 0)
         self.assertEqual(self.offsets(self.board(index, "esp32c3"))["bootloader.bin"], 0)
 
     def test_offsets_come_from_partition_table(self):
@@ -42,17 +42,17 @@ class PackagingTests(PackagingCase):
 
     def test_manifest_shape_and_index_shape(self):
         index = self.package()
-        manifest = json.loads((self.output / "sticks3/manifest.json").read_text())
+        manifest = json.loads((self.output / "esp32s3/manifest.json").read_text())
         self.assertEqual(list(manifest), ["name", "version", "new_install_prompt_erase",
                                           "new_install_improv_wait_time", "builds"])
-        self.assertEqual(manifest["builds"][0]["chipFamily"], BOARDS["sticks3"]["chip"])
+        self.assertEqual(manifest["builds"][0]["chipFamily"], BOARDS["esp32s3"]["chip"])
         self.assertTrue(manifest["new_install_prompt_erase"])
         self.assertEqual(manifest["new_install_improv_wait_time"], 15)
         self.assertEqual(manifest["builds"][0]["parts"][0], {"path": "bootloader.bin", "offset": 0})
         self.assertEqual(index, json.loads((self.output / "index.json").read_text()))
         self.assertEqual(index["schemaVersion"], 2)
-        sticks = self.board(index, "sticks3")
-        self.assertEqual(sticks["manifest"], "sticks3/manifest.json")
+        sticks = self.board(index, "esp32s3")
+        self.assertEqual(sticks["manifest"], "esp32s3/manifest.json")
         self.assertEqual(sticks["buttons"], 2)
         self.assertEqual(self.board(index, "esp32")["buttons"], 1)
         self.assertEqual(len(index["configSha256"]), 64)
@@ -65,7 +65,7 @@ class PackagingTests(PackagingCase):
     def test_improv_wait_zero_when_wifi_disabled(self):
         config = dict(self.config, wifi={"enabled": False})
         self.write_config(config)
-        for env in ("sticks3", "esp32", "esp32c3"):
+        for env in ("esp32s3", "esp32", "esp32c3"):
             self.make_build(env)
         self.package()
         manifest = json.loads((self.output / "esp32/manifest.json").read_text())
@@ -99,7 +99,7 @@ class PackagingTests(PackagingCase):
             self.package()
 
     def test_corrupt_images_rejected(self):
-        path = self.root / ".pio/build/sticks3/firmware.bin"
+        path = self.root / ".pio/build/esp32s3/firmware.bin"
         original = path.read_bytes()
         cases = {"segment checksum": 32, "SHA-256": len(original) - 1}
         for message, index in cases.items():
@@ -136,18 +136,18 @@ class PackagingTests(PackagingCase):
     def test_boards_dropped_from_the_index_are_removed(self):
         self.package()
         (self.output / "other").mkdir()  # not a packager board: stays
-        self.package(envs=["sticks3", "esp32"])
+        self.package(envs=["esp32s3", "esp32"])
         self.assertFalse((self.output / "esp32c3").exists())
         self.assertTrue((self.output / "esp32/manifest.json").is_file())
         self.assertTrue((self.output / "other").is_dir())
         self.assertEqual([b["id"] for b in json.loads((self.output / "index.json").read_text())["boards"]],
-                         ["sticks3", "esp32"])
+                         ["esp32s3", "esp32"])
 
     def test_failure_partway_through_swap_restores_previous_output(self):
         import package_firmware
         self.package()
         before = (self.output / "index.json").read_bytes()
-        sticks = (self.output / "sticks3/manifest.json").read_bytes()
+        sticks = (self.output / "esp32s3/manifest.json").read_bytes()
         real, calls = os.replace, []
 
         def flaky(src, dst):
@@ -161,7 +161,7 @@ class PackagingTests(PackagingCase):
         with self.assertRaisesRegex(OSError, "disk full"):
             self.package()
         self.assertEqual(before, (self.output / "index.json").read_bytes())
-        self.assertEqual(sticks, (self.output / "sticks3/manifest.json").read_bytes())
+        self.assertEqual(sticks, (self.output / "esp32s3/manifest.json").read_bytes())
         self.assertEqual([p.name for p in self.output.parent.iterdir()], ["firmware"])
 
     def test_esptool_import_failure_reports_cause_and_search_path(self):
@@ -182,9 +182,9 @@ class PackagingTests(PackagingCase):
 
     def test_duplicate_boards_rejected(self):
         with self.assertRaisesRegex(ValueError, "Duplicate board"):
-            self.package(envs=["sticks3", "sticks3"])
+            self.package(envs=["esp32s3", "esp32s3"])
         with self.assertRaisesRegex(ValueError, "Duplicate board"):
-            self.package(envs=["sticks3", "sticks3-macro"])
+            self.package(envs=["esp32s3", "esp32s3-alias"])
         self.assertFalse(self.output.exists())
 
     def test_classic_bootloader_fits_below_partition_table(self):

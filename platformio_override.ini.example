@@ -4,7 +4,7 @@
 ; upload_port = /dev/ttyACM0
 ; monitor_port = /dev/ttyACM0
 
-[env:esp32s3]
+[env:wireless-paper]
 ; Use a different config or board row for one env:
 ; custom_config = my-config.yaml
-; custom_board = esp32s3
+; custom_board = wireless-paper

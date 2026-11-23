@@ -1,0 +1,5 @@
+# Fixture board table for the packaging tests: one row per chip family (bootloader offsets differ).
+# Deliberately independent of boards/boards.yaml so those tests keep covering all three chips.
+esp32s3: {label: "Fixture S3", chip: ESP32-S3, driver: gpio, buttons: 2, button_pins: [0, 1], led: {pin: 48, rgb: true}, display: true, battery: true}
+esp32c3: {label: "Fixture C3", chip: ESP32-C3, driver: gpio, button_pins: [9], led: {pin: 8, rgb: true}, display: false, battery: false}
+esp32:   {label: "Fixture classic ESP32", chip: ESP32, driver: gpio, button_pins: [0], led: {pin: 2, rgb: false}, display: false, battery: false}
