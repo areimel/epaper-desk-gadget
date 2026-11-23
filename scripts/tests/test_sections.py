@@ -114,7 +114,7 @@ class BoardTests(unittest.TestCase):
         self.assertEqual(defines["BOARD_EPD_BUSY"], 7)
         self.assertEqual(defines["BOARD_POWER_PIN"], 45)
         self.assertEqual(defines["BOARD_POWER_ACTIVE_LOW"], 1)
-        self.assertEqual(defines["BOARD_EPD_PANEL_FC1"], 1)
+        self.assertEqual(defines["BOARD_EPD_PANEL_E0213A367"], 1)
         self.assertEqual(defines["BOARD_BUTTON_COUNT"], 1)
         self.assertEqual(defines["BOARD_HAS_DISPLAY"], 1)
         self.assertNotIn("BOARD_EPD_PANEL_BN", defines)

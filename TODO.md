@@ -1,116 +1,38 @@
-# Remaining physical checks
+# Physical checks
 
-Every checklist item below is pending. The firmware compiles for every env and
-the host tests pass, which says nothing about pairing, display, buttons, WiFi,
-OTA or battery. The only observation so far is recorded under
-[Observed](#observed). Mark an item done only with a date, the board, the
-firmware version and who observed it. Never claim battery life.
-
-Before any flashing: run `.venv/bin/pio device list`, confirm the chip and flash
-size match the env, and close serial monitors. Port names are examples.
+Hardware behaviour is pending until someone observes it. Mark an item done only
+with a date, the firmware build and who observed it. A successful compile proves
+none of this. Before any flashing: confirm the serial device is the CP2102
+bridge (`10c4:ea60`), read the chip and flash size with esptool, and close serial
+monitors. Port names are examples.
 
 ## Observed
 
-- 2026-11-23, M5Stack Stick-S3 (ESP32-S3-PICO-1, 8 MB flash, 8 MB PSRAM), env
-  `sticks3`, build `v0.1.0-29-gcfbe729`, observed by Claude over USB serial:
-  the default app boots and prints its version, `M5Stack Stick-S3 (2 buttons)`,
-  `BLE advertising: ESP32 Starter`, a battery reading, an Improv state frame
-  and `wifi: no credentials`. It also printed the boot error
-  `STA connect failed! 0x300a: ESP_ERR_WIFI_SSID`. Later firmware no longer
-  attempts a connection without credentials.
-- 2026-11-23, same device, env `sticks3`, build `v0.1.0-40-g65c8496`, observed
-  by Claude over USB serial: the `ESP_ERR_WIFI_SSID` boot error is gone. In 2 of
-  9 USB resets M5GFX autodetect reported board id 155 (M5StampS3Mini) instead of
-  the Stick-S3.
-- 2026-11-23, same device, the following commit (board-detection retry),
-  observed by Claude over USB serial across 12 USB resets: 11 detected the
-  Stick-S3 first time; 1 misdetected, restarted once and then detected it
-  (`Stick-S3 detected after 1 restart(s)`). Whether a cold power-on misdetects
-  is not yet observed.
-- 2026-11-23, same device, env `sticks3-macro`, build `v0.1.0-41-g73e075d`,
-  observed by Claude over USB serial: the macro example boots and prints
-  `Stick-S3 Macro ... on M5Stack Stick-S3, profiles=4`,
-  `BLE advertising: Stick-S3 Macro`, `Active profile 1: CLAUDE` and a battery
-  reading.
+- 2026-11-23, Heltec Wireless Paper on `/dev/ttyUSB0` (CP2102, serial `0001`),
+  read by Claude with esptool: ESP32-S3 (QFN56) rev v0.2, 8 MB embedded flash,
+  no PSRAM reported.
+- 2026-11-23, same board, build `77f1685` plus the canvas and panel driver,
+  observed by Claude over serial: with the panel's reset held low its BUSY pin
+  reads high (idle low), which rules out the V1.1 JD79656 panel. With
+  `panel: fc1` a "full refresh" returned in 261 ms; with `panel: e0213a367` it
+  took 3362 ms.
+- 2026-11-23, same board and build with `panel: e0213a367`, observed by Alec:
+  the test card is upright in landscape, text readable, and both border lines
+  are visible on all four edges (no column offset needed).
+- 2026-11-23, same board: the boot log shows `wifi: reconnecting` with
+  credentials left in NVS by earlier firmware. Whether it joins a network is
+  not yet observed.
 
-Display, pairing, typing, buttons, gestures, the picker, bond reset, Improv
-provisioning, OTA and all other boards remain pending.
+## Pending
 
-## All boards
-
-- [ ] USB upload with `pio run -e <env> -t upload` keeps bonds and WiFi settings.
-- [ ] Serial log prints the project name, version and button count at boot and
-  never blocks without a host attached.
-- [ ] Bluetooth: pairs as `ble.name`, a configured button types its combo on the
-  host, and input while disconnected is discarded without replay.
-- [ ] Hold-at-boot clears bonds (times in [docs/getting-started.md](docs/getting-started.md)); the host
-  must forget and re-pair afterwards. On the GPIO boards, BOOT pressed within
-  about 1 s after reset starts the hold, and BOOT held during reset still
-  enters download mode. A boot without a hold continues about 1 s later.
-- [ ] WiFi provisioning with Improv Serial from the web installer and from a
-  serial client: success persists across reboot, a wrong password leaves the
-  previous credentials working, and the 15 s timeout reports failure.
-- [ ] Dev WiFi credentials from `secrets.yaml` are used only when none are stored,
-  and never overwrite Improv-provisioned credentials (they stay in RAM).
-- [ ] With no credentials at all, boot no longer logs `ESP_ERR_WIFI_SSID`; with
-  stored credentials, the status shows WiFi connecting while disconnected and
-  the 10 s retry reconnects after a drop.
-- [ ] The STA hostname on the network (DHCP / router list) is `wifi.hostname`.
-- [ ] After Improv provisioning the installer offers no dead "Visit device" link.
-- [ ] Browser install from a packaged release: normal install keeps bonds and
-  WiFi settings; choosing erase removes them; Improv prompt appears when
-  `wifi.enabled` is true.
-- [ ] OTA (development build with `ota_password`): upload over `espota` works,
-  wrong password is rejected, a key held when the transfer starts is released
-  on the host, `OTA UPDATING` shows on the display, and the device resumes
-  normal input after a failed transfer.
-- [ ] Release build confirmed to have OTA off.
-
-## `sticks3` (M5Stack Stick-S3)
-
-- [ ] Both buttons map to the configured combos for single, double and long press.
-- [ ] Display: splash, status screen (Bluetooth, WiFi with IP, battery, last
-  action), bond-hold screen and brightness setting render correctly.
-- [ ] Battery percentage and charging indicator are plausible.
-- [ ] Status LED behavior, if the hardware has one, matches `BOARD_LED_PIN`.
-- [ ] Browser install works end to end on this board.
-
-## `esp32s3` (DevKitC-1)
-
-- [ ] BOOT button (GPIO 0) is read as button 0 and does not interfere with boot.
-- [ ] RGB status LED on GPIO 48 blinks on a sent action.
-- [ ] Flash and RAM headroom is acceptable with OTA on.
-
-## `esp32c3` (DevKitM-1)
-
-- [ ] Compile-verified only. BOOT button (GPIO 9) and RGB LED (GPIO 8) work.
-- [ ] A build with OTA on boots and completes an OTA update. With the default
-  config the OTA image does not fit the app partition (measured, see
-  [docs/boards.md](docs/boards.md#memory)); drop a module first.
-- [ ] Bluetooth and WiFi coexist stably.
-
-## `esp32` (classic DevKit)
-
-- [ ] Compile-verified only. BOOT button (GPIO 0) and plain LED (GPIO 2) work.
-- [ ] Browser install writes the bootloader at 0x1000 and the board boots.
-- [ ] Bluetooth and WiFi coexist stably on the nearly full app partition (see [docs/boards.md](docs/boards.md#memory)).
-
-## `sticks3-macro` (macro clicker example)
-
-- [ ] Physical acceptance list in
-  [examples/macro-clicker/README.md](examples/macro-clicker/README.md) (pending
-  from that example).
-
-## Site
-
-- [ ] Rendered site checked on desktop and phone widths with a real packaged
-  release, in light and dark mode.
-- [ ] Release workflow run on a real tag: assets attached, Pages deployed.
-
-## Known limitations
-
-- Pin assignments for the GPIO boards come from standard layouts and have not
-  been checked against hardware.
-- Release and CI builds have no OTA; OTA exists only for development builds.
-- No OTA rollback.
-- No battery-life measurement exists.
+- [ ] Fast refresh: press the button on the test card; the new bar appears
+      without a full flash, and the sixth press in a row does a full refresh.
+- [ ] Ghosting after several fast refreshes is acceptable.
+- [ ] Button click and hold are detected reliably (GPIO0).
+- [ ] WiFi provisioning over Improv from the installer page.
+- [ ] Each dashboard page renders legibly at desk distance.
+- [ ] The web app is reachable at the device's IP and at `desk-gadget.local`.
+- [ ] An edit saved in the web app appears on the panel.
+- [ ] WiFi loss shows stale data and recovers without a restart.
+- [ ] One hour of running with no decline in free heap.
+- [ ] OTA update with a password from `secrets.yaml`.

@@ -2,7 +2,9 @@
 # (default: the env name). Build facts (partitions, flash, memory) live in
 # platformio.ini; this file only describes what the hardware has.
 # Drivers: heltec. E-paper panels: bn, fc1, e0213a367 (scripts/config/boards.py).
-# Wireless Paper V1.1: GPIO0 is the PRG button and also a strapping pin (held during reset it enters ROM
+# This Wireless Paper is marked V1.1 but carries the newer E0213A367 panel (SSD1682): with reset held low
+# its BUSY pin reads high, and the e0213a367 driver draws correctly (observed 2026-11-23). A true V1.1
+# panel (JD79656) reads BUSY low in reset and needs `panel: fc1`. GPIO0 is the PRG button and also a strapping pin (held during reset it enters ROM
 # download mode, so a boot hold must start right after reset; see lib/board/src/BootHold.h).
 # Peripheral power (GPIO45, active low, "Vext") feeds the panel and must be on before it is used.
-wireless-paper: {label: Heltec Wireless Paper, chip: ESP32-S3, driver: heltec, button_pins: [0], led: {pin: 18, rgb: false}, power: {pin: 45, active_low: true}, epaper: {panel: fc1, mosi: 2, sck: 3, cs: 4, dc: 5, rst: 6, busy: 7}, display: true, battery: false}
+wireless-paper: {label: Heltec Wireless Paper, chip: ESP32-S3, driver: heltec, button_pins: [0], led: {pin: 18, rgb: false}, power: {pin: 45, active_low: true}, epaper: {panel: e0213a367, mosi: 2, sck: 3, cs: 4, dc: 5, rst: 6, busy: 7}, display: true, battery: false}

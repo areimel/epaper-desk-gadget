@@ -56,5 +56,6 @@ def board_defines(board_id, board, features, version):
             raise ConfigError("epaper.panel", f"unknown panel {panel!r}; known: {list(PANELS)}")
         plain += [(f"BOARD_EPD_{name.upper()}", epaper[name]) for name in EPD_PINS]
         plain.append((f"BOARD_EPD_PANEL_{panel.upper()}", 1))
+    plain.append(("FEATURE_EPAPER", int(bool(epaper))))
     plain += [(name, int(on)) for name, on in sorted(features.items())]
     return strings, plain

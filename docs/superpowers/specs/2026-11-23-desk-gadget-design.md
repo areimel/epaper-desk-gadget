@@ -15,7 +15,9 @@ Decided with Alec:
 - Pages: **weather, Hacker News, messages/quotes, clock and date, today's
   calendar, notes and to-dos**.
 - Panel driver: **GxEPD2, GPL-3.0 accepted** for published firmware binaries.
-- Board revision: **V1.1** (JD79656 panel, driver `GxEPD2_213_FC1`).
+- Board revision: marked **V1.1**, but the hardware spike found the newer
+  E0213A367 panel (SSD1682); the driver in use is `GxEPD2_213_E0213A367`
+  (`panel: e0213a367`). See `TODO.md`, Observed.
 - Calendar provider: **Google Calendar** (secret iCal address).
 - Web app is **open on the WiFi, no login**.
 
