@@ -40,7 +40,7 @@ def pio_env_options(project):
 
 
 def default_envs(options, boards):
-    """Envs whose board id equals the env name (so aliases like sticks3-macro are skipped)."""
+    """Envs whose board id equals the env name (so aliases like a custom_board alias env are skipped)."""
     return [env for env, opts in options.items()
             if env in boards and opts.get("custom_board", env) == env]
 
