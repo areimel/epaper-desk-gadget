@@ -21,8 +21,8 @@ class CoreTests(unittest.TestCase):
 
     def test_fields_reports_unknown_with_path(self):
         with self.assertRaises(ConfigError) as caught:
-            fields({"nmae": "x"}, ["name"], "ble", optional=())
-        self.assertIn("ble.nmae", str(caught.exception))
+            fields({"nmae": "x"}, ["name"], "project", optional=())
+        self.assertIn("project.nmae", str(caught.exception))
 
     def test_integer_bounds(self):
         self.assertEqual(integer(5, 5, 100, "x"), 5)
@@ -45,17 +45,17 @@ class CoreTests(unittest.TestCase):
 
     def test_unknown_top_level_key(self):
         data = default_config()
-        data["bluetoth"] = {}
+        data["wfi"] = {}
         with self.assertRaises(ConfigError) as caught:
             render(data, make_ctx())
-        self.assertIn("bluetoth", str(caught.exception))
+        self.assertIn("wfi", str(caught.exception))
 
     def test_missing_required_section(self):
         data = default_config()
-        del data["ble"]
+        del data["project"]
         with self.assertRaises(ConfigError) as caught:
             render(data, make_ctx())
-        self.assertIn("ble", str(caught.exception))
+        self.assertIn("project", str(caught.exception))
 
     def test_secrets_rejects_unknown_keys(self):
         with tempfile.TemporaryDirectory() as tmp:
