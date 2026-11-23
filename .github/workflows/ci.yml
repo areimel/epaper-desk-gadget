@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  envs:
+    runs-on: ubuntu-latest
+    outputs:
+      envs: ${{ steps.list.outputs.envs }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: list
+        run: echo "envs=$(python3 scripts/list_envs.py)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: envs
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env: ${{ fromJson(needs.envs.outputs.envs) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Build firmware
+        env:
+          ENV: ${{ matrix.env }}
+        run: pio run -e "$ENV"
+
+  test:
+    needs: envs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      # Packaging and the packaging tests read build outputs, so this job builds
+      # every board itself (PlatformIO packages are cached) rather than passing
+      # artifacts between jobs.
+      - name: Build every board
+        env:
+          ENVS: ${{ join(fromJson(needs.envs.outputs.envs), ' ') }}
+        run: |
+          for env in $ENVS; do pio run -e "$env"; done
+      - run: bash scripts/check.sh
+      - name: Packaging dry-run
+        run: python scripts/package_firmware.py --version 0.0.0-dev --output "$RUNNER_TEMP/firmware"
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          node: 'true'
+      - name: Install, check, test and build the site
+        working-directory: web
+        run: |
+          npm ci
+          npm run check
+          npm test
+          npm run build

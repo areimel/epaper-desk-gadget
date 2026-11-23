@@ -1,0 +1,45 @@
+# PlatformIO build outputs and downloaded dependencies
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# Local Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editor and operating-system metadata
+.vscode/
+.idea/
+.DS_Store
+._*
+Thumbs.db
+*.swp
+*.swo
+
+# Local diagnostics and temporary files
+*.log
+*.tmp
+
+# Astro app and generated release artifacts
+web/node_modules/
+web/.astro/
+web/dist/
+web/public/firmware/
+
+# Local secrets and overrides (never commit)
+secrets.yaml
+platformio_override.ini
+
+# Subagent-driven-development scratch (ledger, briefs, review packages)
+.superpowers/
+
+# Local tool state
+.claude/
+.playwright-mcp/

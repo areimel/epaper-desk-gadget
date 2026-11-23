@@ -1,0 +1,58 @@
+# ESP32 Starter configuration. Edit this file, then rebuild.
+# Invalid entries fail the build with the path of the problem.
+#
+# WARNING: this file is embedded in the firmware and published with releases.
+# Never put passwords, tokens or other secrets here. OTA and dev WiFi
+# credentials go in the gitignored secrets.yaml (see secrets.example.yaml).
+#
+# Sections:
+#   project   name (1-32 chars), tagline and description for the UI and web installer
+#   ble       Bluetooth LE HID keyboard: enabled, name (1-29 UTF-8 bytes), keystroke_ms (5-100)
+#   wifi      enabled, hostname (RFC 1123 label, 1-32); provision via Improv Serial
+#   ota       enabled; needs wifi.enabled: true and ota_password in secrets.yaml,
+#             otherwise it is left out of the build with a warning
+#   display   enabled, brightness (1-255); ignored on boards without a display
+#   gestures  debounce_ms < double_click_ms < long_press_ms
+#   buttons   list, one entry per physical button (extras are dropped with a warning);
+#             each has single / double / long actions: null or a key combo such as
+#             "CMD+SHIFT+4" or { keys: "CTRL+C", label: COPY } (label 1-10 ASCII chars)
+#   schema    optional path to a .py module that adds project-specific sections
+#
+# Modifiers: CTRL, SHIFT, ALT (OPT), CMD (GUI, WIN, META, SUPER).
+# Keys: A-Z 0-9 F1-F24 ENTER ESC BACKSPACE TAB SPACE DELETE INSERT HOME END
+#   PAGE_UP PAGE_DOWN UP DOWN LEFT RIGHT CAPS_LOCK PRINT_SCREEN MINUS EQUAL
+#   LBRACKET RBRACKET BACKSLASH SEMICOLON QUOTE GRAVE COMMA PERIOD SLASH
+
+project:
+  name: ESP32 Starter
+  tagline: A starting point for ESP32 firmware projects
+  description: BLE HID, WiFi provisioning, OTA and a status display on several boards.
+
+ble:
+  enabled: true
+  name: ESP32 Starter
+  keystroke_ms: 15 # time each key is held, and the gap after it
+
+wifi:
+  enabled: true
+  hostname: esp32-starter
+
+ota:
+  enabled: true
+
+display:
+  enabled: true
+  brightness: 64
+
+gestures:
+  debounce_ms: 25
+  double_click_ms: 250
+  long_press_ms: 650
+
+buttons:
+  - single: { keys: "CTRL+C", label: COPY }
+    double: { keys: "CTRL+V", label: PASTE }
+    long: { keys: "CTRL+X", label: CUT }
+  - single: { keys: ESC, label: ESCAPE }
+    double: null
+    long: { keys: "CTRL+Z", label: UNDO }
