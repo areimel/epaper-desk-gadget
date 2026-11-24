@@ -1,8 +1,9 @@
 # Getting started
 
-Build the default app for your board, read its serial log, then pair Bluetooth
-and join WiFi. Hardware results below are what the code is written to do; none
-has been observed on a device yet (see [../TODO.md](../TODO.md)).
+Build the firmware for the Heltec Wireless Paper, flash it, join WiFi and open
+the web app. What the code is written to do is described here; what has been
+seen on a real unit is only what [../TODO.md](../TODO.md) records under
+"Observed". Everything else is pending.
 
 ## 1. Set up tools
 
@@ -14,98 +15,90 @@ python3 -m venv .venv
 On Windows the same tools are `.venv\Scripts\pio` and `.venv\Scripts\pip`. The
 generator runs inside PlatformIO's own Python, so PyYAML must be installed in
 the environment that provides `pio`. The first build downloads the pinned
-pioarduino platform (Arduino-ESP32 3.3.x), M5Unified, M5GFX and NimBLE.
+pioarduino platform (Arduino-ESP32 3.3.x), U8g2 and the GxEPD2 fork.
 
 ## 2. Build
 
 ```sh
-.venv/bin/pio run -e sticks3     # M5Stack Stick-S3
-.venv/bin/pio run -e esp32s3     # ESP32-S3 DevKitC-1
-.venv/bin/pio run -e esp32c3     # ESP32-C3 DevKitM-1
-.venv/bin/pio run -e esp32       # classic ESP32 DevKit
+.venv/bin/pio run -e wireless-paper
 ```
 
 Each build validates `config.yaml`, writes
-`.pio/build/<env>/generated/generated_config.h` and prints warnings such as
-`warning: OTA disabled: no ota_password in secrets.yaml`. A configuration error
-stops the build with `Configuration error:` and the path of the bad key. Never
-edit or commit the generated header.
+`.pio/build/wireless-paper/generated/generated_config.h` and prints warnings
+such as `warning: OTA disabled: no ota_password in secrets.yaml`. A
+configuration error stops the build with `Configuration error:` and the path of
+the bad key. Never edit or commit the generated header.
 
-## 3. Flash and watch the log
+Check the panel setting for your board first: this unit is marked V1.1 but
+needs `panel: e0213a367`. See [boards.md](boards.md#which-panel-does-yours-have).
 
-Identify the device first; port names are examples, not stable identifiers.
+## 3. Flash
 
-```sh
-.venv/bin/pio device list
-.venv/bin/pio run -e sticks3 -t upload
-.venv/bin/pio device monitor
-```
+Only flash a device you have named and identified. Follow these steps in order.
 
-Close the serial monitor before uploading. To override the port without
-editing `platformio.ini`, copy `platformio_override.ini.example` to
-`platformio_override.ini` (gitignored) and set `upload_port` and
-`monitor_port`. Recovery and the browser installer are in
-[flashing-and-ota.md](flashing-and-ota.md).
+1. Close any serial monitor.
+2. List devices: `.venv/bin/pio device list`. The board's USB bridge is a
+   CP2102 (`10c4:ea60`). Port names such as `/dev/ttyUSB0` are examples, not
+   stable identifiers; check again after every reconnect.
+3. Confirm the chip and flash with esptool (it ships inside PlatformIO's
+   tools): expect an ESP32-S3 with 8 MB flash.
+4. Upload: `.venv/bin/pio run -e wireless-paper -t upload`.
+5. Watch the log: `.venv/bin/pio device monitor` (115200 baud).
 
-The firmware never waits for a USB serial host. The log prints at 115200 baud,
-for example `[I] ESP32 Starter <version> on <board label> (<n> buttons)`.
-Levels are set with `-DLOG_LEVEL=n` (0 off to 4 debug, default 3).
+To pin a port without editing `platformio.ini`, copy
+`platformio_override.ini.example` to `platformio_override.ini` (gitignored) and
+set `upload_port` and `monitor_port`. Never run erase, upload or `espota`
+against a device you have not identified. Recovery and the browser installer are
+in [flashing-and-ota.md](flashing-and-ota.md).
 
-## 4. Use the default app
+The firmware never waits for a USB serial host. Levels are set with
+`-DLOG_LEVEL=n` (0 off to 4 debug, default 3).
 
-| Input | Result |
-|---|---|
-| Single, double or long press on a button | Sends that button's key combo over BLE HID, if configured and the link is ready |
-| Hold every button at boot | Clears Bluetooth bonds: 3 s on 2-button boards, 5 s on 1-button boards |
+## 4. Join WiFi
 
-The hold must start within about 1 s of the boot-hold check; a boot without
-the hold continues after that second. On boards with a display the check runs
-after the splash (about 700 ms), so keep the buttons held through it. On the
-1-button GPIO boards (`esp32s3`, `esp32c3`, `esp32`) the button is BOOT, a
-strapping pin: holding it during reset enters ROM download mode instead of
-booting the app. Press BOOT right after reset, not during it. After clearing,
-forget the device in the host's Bluetooth settings and pair again. Changing
-the HID report descriptor requires the same forget-and-re-pair step.
+There are two ways, both without any network service on the device.
 
-Input is discarded while Bluetooth is not connected and ready; actions are
-never queued or replayed. The status LED, where the board has one, blinks
-briefly on each sent action. With a display the screen shows Bluetooth, WiFi
-(with IP), battery and the last action label.
+**Improv Serial (normal).** With `wifi.enabled: true`, WiFi is provisioned over
+USB from the web installer page right after install, or from any Improv client
+on the serial port. Provisioning never blocks the app: a connection attempt
+gets 15 seconds, credentials are saved only after the connection succeeds, and
+the previous ones are restored if it fails. Improv shares the log port; other
+bytes are ignored. The reply is planned to include the device's IP URL.
 
-## 5. Pair Bluetooth
+**Development credentials.** Copy `secrets.example.yaml` to `secrets.yaml`
+(gitignored) and set `wifi_ssid` and `wifi_password`. They are used only when
+the device has no stored credentials, are held in RAM and never overwrite
+credentials saved by Improv. Do not publish a binary built with them. Never put
+credentials in `config.yaml` or paste them into chat or issues.
 
-1. Power the board. It advertises as the `ble.name` from `config.yaml`
-   (default `ESP32 Starter`).
-2. Pair it from the host's Bluetooth settings.
-3. Press a button with an assigned action and check the host receives the combo.
+While credentials exist but the device is not connected it retries every 10 s.
+Whether a given unit joins your network is pending a physical check.
 
-Pairing reliability and typing behavior are pending physical checks.
+## 5. Open the web app
 
-## 6. Join WiFi
+On the same WiFi, open the device's IP address, or `http://desk-gadget.local`
+(the hostname is `wifi.hostname`; `.local` depends on your network). From there
+you set your city, timezone, calendar link, messages and notes, and reorder
+pages. **The web app has no login: anyone on your WiFi can view and edit.**
+Details, routes and data sources: [dashboard.md](dashboard.md) and [api.md](api.md).
 
-With `wifi.enabled: true`, WiFi can be provisioned over USB with Improv Serial.
-This works from the web installer right after install, or from any Improv
-client on the serial port. The device keeps provisioning non-blocking: the
-handler is advanced by `net::updateImprov()` from the main loop, gives a
-connection attempt 15 seconds, saves the new credentials only after the
-connection succeeds, and restores the previous ones when it fails.
-Improv frames share the log port; other bytes are ignored.
+The web app and its device-side server are being built by other workstreams
+(planned: `device-ui/`, `lib/net` `Api`). At the time of writing the app in
+`src/` is only the panel test card; check `TODO.md` and `git log` for what has landed.
 
-For development you can instead set `wifi_ssid` and `wifi_password` in
-`secrets.yaml` (copy `secrets.example.yaml`). They are used only when the device
-has no stored credentials; stored credentials always win. Dev credentials are
-kept in RAM only, so they never overwrite credentials saved by Improv. With
-neither, the device makes no connection attempt and waits for Improv. While
-credentials are configured but not connected, the app retries every 10 s.
+## 6. Use the button
 
-## 7. Edit the config
+One button (GPIO0). The design is: click shows the next page now, hold
+refetches every source. Press timing is `gestures` in `config.yaml`. Button
+detection is pending a hardware check.
 
-Change `config.yaml` (names, buttons, timing, modules) and rebuild. Keys are
-in [configuration.md](configuration.md). To keep several configs, set
-`custom_config = my-config.yaml` for an env in `platformio_override.ini`.
+## 7. Edit the build-time config
+
+Change `config.yaml` (name, hostname, dwell, starter messages) and rebuild.
+Keys are in [configuration.md](configuration.md).
 
 ## Next
 
-- Add OTA for development: [flashing-and-ota.md](flashing-and-ota.md).
-- Turn the template into your own repo: [new-project-checklist.md](new-project-checklist.md).
-- Try the original product: [../examples/macro-clicker/README.md](../examples/macro-clicker/README.md).
+- Development OTA, packaging and releases: [flashing-and-ota.md](flashing-and-ota.md).
+- Tests: [testing.md](testing.md).
+- Code map: [modules.md](modules.md).
