@@ -120,6 +120,8 @@ void test_split_prop_quoted_colon_and_case() {
   TEST_ASSERT_TRUE(ics::param(p, "TZID", tz, sizeof tz));
   TEST_ASSERT_EQUAL_STRING("odd:zone", tz);
   TEST_ASSERT_FALSE(ics::param(p, "TZID", tz, 4));  // does not fit
+  TEST_ASSERT_TRUE(ics::hasParam(p, "TZID"));
+  TEST_ASSERT_FALSE(ics::hasParam(p, "VALUE"));
 }
 
 void test_split_prop_rejects_non_property() {

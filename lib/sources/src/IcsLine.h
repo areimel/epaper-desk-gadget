@@ -50,6 +50,9 @@ bool is(const Prop& p, const char* upperName);
 // not fit.
 bool param(const Prop& p, const char* upperKey, char* out, size_t cap);
 
+// True if parameter `upperKey` is present, whatever its length.
+bool hasParam(const Prop& p, const char* upperKey);
+
 // Case-insensitive comparison of a NUL-terminated string with an uppercase literal.
 bool equalsUpper(const char* s, const char* upper);
 bool equalsUpper(const char* s, size_t len, const char* upper);

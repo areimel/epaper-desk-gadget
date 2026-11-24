@@ -51,7 +51,10 @@ bool applyPart(Rule& r, const char* k, size_t kn, const char* v, size_t vn) {
     memcpy(buf, v, vn);
     buf[vn] = '\0';
     r.until = parseTime(buf, nullptr);
-    if (r.until.kind == Kind::Bad) return false;
+    if (r.until.kind == Kind::Bad) {
+      r.until = Time();  // unknown end: never treated as "ended"
+      return false;
+    }
   } else if (equalsUpper(k, kn, "WKST")) {
     int w = dayCode(v, vn);
     if (w < 0) return false;
@@ -134,12 +137,17 @@ Rule parseRule(const char* value) {
   Rule r;
   bool ok = true;
   const char* s = value;
-  while (ok && *s) {
+  // Every part is read even after an unsupported one, so that UNTIL is known: an unsupported
+  // series that ended long ago is not counted as skipped.
+  while (*s) {
     const char* end = strchr(s, ';');
     size_t n = end ? static_cast<size_t>(end - s) : strlen(s);
     const char* eq = static_cast<const char*>(memchr(s, '=', n));
-    if (!eq) ok = n == 0;  // tolerate an empty part (";;" or a trailing ';')
-    else ok = applyPart(r, s, static_cast<size_t>(eq - s), eq + 1, n - static_cast<size_t>(eq - s) - 1);
+    if (!eq) ok = ok && n == 0;  // tolerate an empty part (";;" or a trailing ';')
+    else {
+      size_t kn = static_cast<size_t>(eq - s);
+      if (!applyPart(r, s, kn, eq + 1, n - kn - 1)) ok = false;
+    }
     s += n + (end ? 1 : 0);
   }
   if (!ok || r.freq == Freq::None) r.freq = Freq::Unsupported;

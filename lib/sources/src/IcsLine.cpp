@@ -69,32 +69,50 @@ bool equalsUpper(const char* s, const char* upperLit) { return equalsUpper(s, st
 
 bool is(const Prop& p, const char* upperName) { return equalsUpper(p.name, p.nameLen, upperName); }
 
-bool param(const Prop& p, const char* upperKey, char* out, size_t cap) {
+namespace {
+
+// Finds parameter `upperKey`; *v / *n receive its value without surrounding quotes.
+bool findParam(const Prop& p, const char* upperKey, const char** v, size_t* n) {
   const char* s = p.params;
   const char* end = p.params + p.paramsLen;
   while (s < end) {
     // One parameter: KEY=VALUE up to the next ';' outside quotes.
     const char* eq = s;
     while (eq < end && *eq != '=' && *eq != ';') eq++;
-    const char* v = eq < end && *eq == '=' ? eq + 1 : eq;
-    const char* vEnd = v;
+    const char* val = eq < end && *eq == '=' ? eq + 1 : eq;
+    const char* vEnd = val;
     bool quoted = false;
     while (vEnd < end && (quoted || *vEnd != ';')) {
       if (*vEnd == '"') quoted = !quoted;
       vEnd++;
     }
     if (equalsUpper(s, static_cast<size_t>(eq - s), upperKey)) {
-      if (vEnd > v && *v == '"') v++;
-      const char* stop = (vEnd > v && vEnd[-1] == '"') ? vEnd - 1 : vEnd;
-      size_t n = static_cast<size_t>(stop - v);
-      if (n + 1 > cap) return false;
-      memcpy(out, v, n);
-      out[n] = '\0';
+      if (vEnd > val && *val == '"') val++;
+      const char* stop = (vEnd > val && vEnd[-1] == '"') ? vEnd - 1 : vEnd;
+      *v = val;
+      *n = static_cast<size_t>(stop - val);
       return true;
     }
     s = vEnd < end ? vEnd + 1 : end;
   }
   return false;
+}
+
+}  // namespace
+
+bool hasParam(const Prop& p, const char* upperKey) {
+  const char* v;
+  size_t n;
+  return findParam(p, upperKey, &v, &n);
+}
+
+bool param(const Prop& p, const char* upperKey, char* out, size_t cap) {
+  const char* v;
+  size_t n;
+  if (!findParam(p, upperKey, &v, &n) || n + 1 > cap) return false;
+  memcpy(out, v, n);
+  out[n] = '\0';
+  return true;
 }
 
 void unescapeText(char* s) {

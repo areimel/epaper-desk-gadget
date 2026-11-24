@@ -52,6 +52,17 @@ void test_parse_unsupported() {
   for (const char* s : rules) TEST_ASSERT_EQUAL_MESSAGE(Freq::Unsupported, ics::parseRule(s).freq, s);
 }
 
+void test_unsupported_rule_keeps_until() {
+  // So that an unsupported series that ended long ago is not counted as skipped.
+  ics::Rule r = ics::parseRule("FREQ=MONTHLY;UNTIL=20250101T000000Z;BYMONTHDAY=1");
+  TEST_ASSERT_EQUAL(Freq::Unsupported, r.freq);
+  TEST_ASSERT_EQUAL(ics::Kind::Utc, r.until.kind);
+  TEST_ASSERT_EQUAL(D(2025, 1, 1), r.until.day);
+  r = ics::parseRule("FREQ=DAILY;UNTIL=garbage");
+  TEST_ASSERT_EQUAL(Freq::Unsupported, r.freq);
+  TEST_ASSERT_EQUAL(ics::Kind::None, r.until.kind);
+}
+
 void test_daily_interval_and_count() {
   int32_t d0 = D(2026, 11, 1);
   TEST_ASSERT_TRUE(occurs("FREQ=DAILY;INTERVAL=3", d0, D(2026, 11, 22)));
@@ -177,6 +188,7 @@ int main() {
   UNITY_BEGIN();
   RUN_TEST(test_parse_supported);
   RUN_TEST(test_parse_unsupported);
+  RUN_TEST(test_unsupported_rule_keeps_until);
   RUN_TEST(test_daily_interval_and_count);
   RUN_TEST(test_weekly_interval_byday);
   RUN_TEST(test_weekly_wkst_matters_with_interval);

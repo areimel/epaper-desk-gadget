@@ -1,0 +1,428 @@
+BEGIN:VCALENDAR
+PRODID:-//Google Inc//Google Calendar 70.9054//EN
+VERSION:2.0
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Example calendar
+X-WR-TIMEZONE:America/New_York
+BEGIN:VTIMEZONE
+TZID:America/New_York
+X-LIC-LOCATION:America/New_York
+BEGIN:DAYLIGHT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+TZNAME:EDT
+DTSTART:19700308T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+TZNAME:EST
+DTSTART:19701101T020000
+RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261123T080000
+DTSTAMP:20261120T120000Z
+UID:evt0010abc@google.com
+CREATED:20260101T000000Z
+LAST-MODIFIED:20261101T000000Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Reminder
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261123T130000
+DURATION:PT1H30M
+DESCRIPTION:Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit
+  amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum
+  dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. L
+ orem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, cons
+ ectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit a
+ met\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum d
+ olor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lor
+ em ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consec
+ tetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit ame
+ t\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dol
+ or sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem
+  ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consecte
+ tur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\
+ , consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor
+  sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem i
+ psum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetu
+ r. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, 
+ consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor s
+ it amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ips
+ um dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur.
+  Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, co
+ nsectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit
+  amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum
+  dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. L
+ orem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, cons
+ ectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit a
+ met\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum d
+ olor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lor
+ em ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consec
+ tetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit ame
+ t\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dol
+ or sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem
+  ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consecte
+ tur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\
+ , consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor
+  sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem i
+ psum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetu
+ r. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, 
+ consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor s
+ it amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ips
+ um dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur.
+  Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, co
+ nsectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit
+  amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum
+  dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. L
+ orem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, cons
+ ectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit a
+ met\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum d
+ olor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lor
+ em ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consec
+ tetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit ame
+ t\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dol
+ or sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem
+  ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consecte
+ tur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\
+ , consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor
+  sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem i
+ psum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetu
+ r. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, 
+ consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor s
+ it amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ips
+ um dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur.
+  Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, co
+ nsectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit
+  amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum
+  dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. L
+ orem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, cons
+ ectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit a
+ met\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum d
+ olor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lor
+ em ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consec
+ tetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit ame
+ t\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dol
+ or sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem
+  ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consecte
+ tur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\
+ , consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor
+  sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem i
+ psum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetu
+ r. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, 
+ consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor s
+ it amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ips
+ um dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur.
+  Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, co
+ nsectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit
+  amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum
+  dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. L
+ orem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, cons
+ ectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit a
+ met\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum d
+ olor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lor
+ em ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consec
+ tetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit ame
+ t\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dol
+ or sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem
+  ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consecte
+ tur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\
+ , consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor
+  sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem i
+ psum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetu
+ r. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, 
+ consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor s
+ it amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ips
+ um dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur.
+  Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, co
+ nsectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit
+  amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum
+  dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. L
+ orem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, cons
+ ectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit a
+ met\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum d
+ olor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lor
+ em ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consec
+ tetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit ame
+ t\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dol
+ or sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem
+  ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consecte
+ tur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\
+ , consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor
+  sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem i
+ psum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetu
+ r. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, 
+ consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor s
+ it amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ips
+ um dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur.
+  Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, co
+ nsectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit
+  amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum
+  dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. L
+ orem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, cons
+ ectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit a
+ met\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum d
+ olor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lor
+ em ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit amet\, consec
+ tetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dolor sit ame
+ t\, consectetur. Lorem ipsum dolor sit amet\, consectetur. Lorem ipsum dol
+ or sit amet\, consectetur. 
+ATTENDEE;CN=Guest;ROLE=REQ-PARTICIPANT:mailto:guest0@example.invalid;mailto
+ :guest1@example.invalid;mailto:guest2@example.invalid;mailto:guest3@exampl
+ e.invalid;mailto:guest4@example.invalid;mailto:guest5@example.invalid;mail
+ to:guest6@example.invalid;mailto:guest7@example.invalid;mailto:guest8@exam
+ ple.invalid;mailto:guest9@example.invalid;mailto:guest10@example.invalid;m
+ ailto:guest11@example.invalid;mailto:guest12@example.invalid;mailto:guest1
+ 3@example.invalid;mailto:guest14@example.invalid;mailto:guest15@example.in
+ valid;mailto:guest16@example.invalid;mailto:guest17@example.invalid;mailto
+ :guest18@example.invalid;mailto:guest19@example.invalid;mailto:guest20@exa
+ mple.invalid;mailto:guest21@example.invalid;mailto:guest22@example.invalid
+ ;mailto:guest23@example.invalid;mailto:guest24@example.invalid;mailto:gues
+ t25@example.invalid;mailto:guest26@example.invalid;mailto:guest27@example.
+ invalid;mailto:guest28@example.invalid;mailto:guest29@example.invalid;mail
+ to:guest30@example.invalid;mailto:guest31@example.invalid;mailto:guest32@e
+ xample.invalid;mailto:guest33@example.invalid;mailto:guest34@example.inval
+ id;mailto:guest35@example.invalid;mailto:guest36@example.invalid;mailto:gu
+ est37@example.invalid;mailto:guest38@example.invalid;mailto:guest39@exampl
+ e.invalid;mailto:guest40@example.invalid;mailto:guest41@example.invalid;ma
+ ilto:guest42@example.invalid;mailto:guest43@example.invalid;mailto:guest44
+ @example.invalid;mailto:guest45@example.invalid;mailto:guest46@example.inv
+ alid;mailto:guest47@example.invalid;mailto:guest48@example.invalid;mailto:
+ guest49@example.invalid;mailto:guest50@example.invalid;mailto:guest51@exam
+ ple.invalid;mailto:guest52@example.invalid;mailto:guest53@example.invalid;
+ mailto:guest54@example.invalid;mailto:guest55@example.invalid;mailto:guest
+ 56@example.invalid;mailto:guest57@example.invalid;mailto:guest58@example.i
+ nvalid;mailto:guest59@example.invalid;mailto:guest60@example.invalid;mailt
+ o:guest61@example.invalid;mailto:guest62@example.invalid;mailto:guest63@ex
+ ample.invalid;mailto:guest64@example.invalid;mailto:guest65@example.invali
+ d;mailto:guest66@example.invalid;mailto:guest67@example.invalid;mailto:gue
+ st68@example.invalid;mailto:guest69@example.invalid;mailto:guest70@example
+ .invalid;mailto:guest71@example.invalid;mailto:guest72@example.invalid;mai
+ lto:guest73@example.invalid;mailto:guest74@example.invalid;mailto:guest75@
+ example.invalid;mailto:guest76@example.invalid;mailto:guest77@example.inva
+ lid;mailto:guest78@example.invalid;mailto:guest79@example.invalid;mailto:g
+ uest80@example.invalid;mailto:guest81@example.invalid;mailto:guest82@examp
+ le.invalid;mailto:guest83@example.invalid;mailto:guest84@example.invalid;m
+ ailto:guest85@example.invalid;mailto:guest86@example.invalid;mailto:guest8
+ 7@example.invalid;mailto:guest88@example.invalid;mailto:guest89@example.in
+ valid;mailto:guest90@example.invalid;mailto:guest91@example.invalid;mailto
+ :guest92@example.invalid;mailto:guest93@example.invalid;mailto:guest94@exa
+ mple.invalid;mailto:guest95@example.invalid;mailto:guest96@example.invalid
+ ;mailto:guest97@example.invalid;mailto:guest98@example.invalid;mailto:gues
+ t99@example.invalid;mailto:guest100@example.invalid;mailto:guest101@exampl
+ e.invalid;mailto:guest102@example.invalid;mailto:guest103@example.invalid;
+ mailto:guest104@example.invalid;mailto:guest105@example.invalid;mailto:gue
+ st106@example.invalid;mailto:guest107@example.invalid;mailto:guest108@exam
+ ple.invalid;mailto:guest109@example.invalid;mailto:guest110@example.invali
+ d;mailto:guest111@example.invalid;mailto:guest112@example.invalid;mailto:g
+ uest113@example.invalid;mailto:guest114@example.invalid;mailto:guest115@ex
+ ample.invalid;mailto:guest116@example.invalid;mailto:guest117@example.inva
+ lid;mailto:guest118@example.invalid;mailto:guest119@example.invalid;mailto
+ :guest120@example.invalid;mailto:guest121@example.invalid;mailto:guest122@
+ example.invalid;mailto:guest123@example.invalid;mailto:guest124@example.in
+ valid;mailto:guest125@example.invalid;mailto:guest126@example.invalid;mail
+ to:guest127@example.invalid;mailto:guest128@example.invalid;mailto:guest12
+ 9@example.invalid;mailto:guest130@example.invalid;mailto:guest131@example.
+ invalid;mailto:guest132@example.invalid;mailto:guest133@example.invalid;ma
+ ilto:guest134@example.invalid;mailto:guest135@example.invalid;mailto:guest
+ 136@example.invalid;mailto:guest137@example.invalid;mailto:guest138@exampl
+ e.invalid;mailto:guest139@example.invalid;mailto:guest140@example.invalid;
+ mailto:guest141@example.invalid;mailto:guest142@example.invalid;mailto:gue
+ st143@example.invalid;mailto:guest144@example.invalid;mailto:guest145@exam
+ ple.invalid;mailto:guest146@example.invalid;mailto:guest147@example.invali
+ d;mailto:guest148@example.invalid;mailto:guest149@example.invalid;mailto:g
+ uest150@example.invalid;mailto:guest151@example.invalid;mailto:guest152@ex
+ ample.invalid;mailto:guest153@example.invalid;mailto:guest154@example.inva
+ lid;mailto:guest155@example.invalid;mailto:guest156@example.invalid;mailto
+ :guest157@example.invalid;mailto:guest158@example.invalid;mailto:guest159@
+ example.invalid;mailto:guest160@example.invalid;mailto:guest161@example.in
+ valid;mailto:guest162@example.invalid;mailto:guest163@example.invalid;mail
+ to:guest164@example.invalid;mailto:guest165@example.invalid;mailto:guest16
+ 6@example.invalid;mailto:guest167@example.invalid;mailto:guest168@example.
+ invalid;mailto:guest169@example.invalid;mailto:guest170@example.invalid;ma
+ ilto:guest171@example.invalid;mailto:guest172@example.invalid;mailto:guest
+ 173@example.invalid;mailto:guest174@example.invalid;mailto:guest175@exampl
+ e.invalid;mailto:guest176@example.invalid;mailto:guest177@example.invalid;
+ mailto:guest178@example.invalid;mailto:guest179@example.invalid;mailto:gue
+ st180@example.invalid;mailto:guest181@example.invalid;mailto:guest182@exam
+ ple.invalid;mailto:guest183@example.invalid;mailto:guest184@example.invali
+ d;mailto:guest185@example.invalid;mailto:guest186@example.invalid;mailto:g
+ uest187@example.invalid;mailto:guest188@example.invalid;mailto:guest189@ex
+ ample.invalid;mailto:guest190@example.invalid;mailto:guest191@example.inva
+ lid;mailto:guest192@example.invalid;mailto:guest193@example.invalid;mailto
+ :guest194@example.invalid;mailto:guest195@example.invalid;mailto:guest196@
+ example.invalid;mailto:guest197@example.invalid;mailto:guest198@example.in
+ valid;mailto:guest199@example.invalid;mailto:guest200@example.invalid;mail
+ to:guest201@example.invalid;mailto:guest202@example.invalid;mailto:guest20
+ 3@example.invalid;mailto:guest204@example.invalid;mailto:guest205@example.
+ invalid;mailto:guest206@example.invalid;mailto:guest207@example.invalid;ma
+ ilto:guest208@example.invalid;mailto:guest209@example.invalid;mailto:guest
+ 210@example.invalid;mailto:guest211@example.invalid;mailto:guest212@exampl
+ e.invalid;mailto:guest213@example.invalid;mailto:guest214@example.invalid;
+ mailto:guest215@example.invalid;mailto:guest216@example.invalid;mailto:gue
+ st217@example.invalid;mailto:guest218@example.invalid;mailto:guest219@exam
+ ple.invalid;mailto:guest220@example.invalid;mailto:guest221@example.invali
+ d;mailto:guest222@example.invalid;mailto:guest223@example.invalid;mailto:g
+ uest224@example.invalid;mailto:guest225@example.invalid;mailto:guest226@ex
+ ample.invalid;mailto:guest227@example.invalid;mailto:guest228@example.inva
+ lid;mailto:guest229@example.invalid;mailto:guest230@example.invalid;mailto
+ :guest231@example.invalid;mailto:guest232@example.invalid;mailto:guest233@
+ example.invalid;mailto:guest234@example.invalid;mailto:guest235@example.in
+ valid;mailto:guest236@example.invalid;mailto:guest237@example.invalid;mail
+ to:guest238@example.invalid;mailto:guest239@example.invalid;mailto:guest24
+ 0@example.invalid;mailto:guest241@example.invalid;mailto:guest242@example.
+ invalid;mailto:guest243@example.invalid;mailto:guest244@example.invalid;ma
+ ilto:guest245@example.invalid;mailto:guest246@example.invalid;mailto:guest
+ 247@example.invalid;mailto:guest248@example.invalid;mailto:guest249@exampl
+ e.invalid;mailto:guest250@example.invalid;mailto:guest251@example.invalid;
+ mailto:guest252@example.invalid;mailto:guest253@example.invalid;mailto:gue
+ st254@example.invalid;mailto:guest255@example.invalid;mailto:guest256@exam
+ ple.invalid;mailto:guest257@example.invalid;mailto:guest258@example.invali
+ d;mailto:guest259@example.invalid;mailto:guest260@example.invalid;mailto:g
+ uest261@example.invalid;mailto:guest262@example.invalid;mailto:guest263@ex
+ ample.invalid;mailto:guest264@example.invalid;mailto:guest265@example.inva
+ lid;mailto:guest266@example.invalid;mailto:guest267@example.invalid;mailto
+ :guest268@example.invalid;mailto:guest269@example.invalid;mailto:guest270@
+ example.invalid;mailto:guest271@example.invalid;mailto:guest272@example.in
+ valid;mailto:guest273@example.invalid;mailto:guest274@example.invalid;mail
+ to:guest275@example.invalid;mailto:guest276@example.invalid;mailto:guest27
+ 7@example.invalid;mailto:guest278@example.invalid;mailto:guest279@example.
+ invalid;mailto:guest280@example.invalid;mailto:guest281@example.invalid;ma
+ ilto:guest282@example.invalid;mailto:guest283@example.invalid;mailto:guest
+ 284@example.invalid;mailto:guest285@example.invalid;mailto:guest286@exampl
+ e.invalid;mailto:guest287@example.invalid;mailto:guest288@example.invalid;
+ mailto:guest289@example.invalid;mailto:guest290@example.invalid;mailto:gue
+ st291@example.invalid;mailto:guest292@example.invalid;mailto:guest293@exam
+ ple.invalid;mailto:guest294@example.invalid;mailto:guest295@example.invali
+ d;mailto:guest296@example.invalid;mailto:guest297@example.invalid;mailto:g
+ uest298@example.invalid;mailto:guest299@example.invalid;mailto:guest300@ex
+ ample.invalid;mailto:guest301@example.invalid;mailto:guest302@example.inva
+ lid;mailto:guest303@example.invalid;mailto:guest304@example.invalid;mailto
+ :guest305@example.invalid;mailto:guest306@example.invalid;mailto:guest307@
+ example.invalid;mailto:guest308@example.invalid;mailto:guest309@example.in
+ valid;mailto:guest310@example.invalid;mailto:guest311@example.invalid;mail
+ to:guest312@example.invalid;mailto:guest313@example.invalid;mailto:guest31
+ 4@example.invalid;mailto:guest315@example.invalid;mailto:guest316@example.
+ invalid;mailto:guest317@example.invalid;mailto:guest318@example.invalid;ma
+ ilto:guest319@example.invalid;mailto:guest320@example.invalid;mailto:guest
+ 321@example.invalid;mailto:guest322@example.invalid;mailto:guest323@exampl
+ e.invalid;mailto:guest324@example.invalid;mailto:guest325@example.invalid;
+ mailto:guest326@example.invalid;mailto:guest327@example.invalid;mailto:gue
+ st328@example.invalid;mailto:guest329@example.invalid;mailto:guest330@exam
+ ple.invalid;mailto:guest331@example.invalid;mailto:guest332@example.invali
+ d;mailto:guest333@example.invalid;mailto:guest334@example.invalid;mailto:g
+ uest335@example.invalid;mailto:guest336@example.invalid;mailto:guest337@ex
+ ample.invalid;mailto:guest338@example.invalid;mailto:guest339@example.inva
+ lid;mailto:guest340@example.invalid;mailto:guest341@example.invalid;mailto
+ :guest342@example.invalid;mailto:guest343@example.invalid;mailto:guest344@
+ example.invalid;mailto:guest345@example.invalid;mailto:guest346@example.in
+ valid;mailto:guest347@example.invalid;mailto:guest348@example.invalid;mail
+ to:guest349@example.invalid;mailto:guest350@example.invalid;mailto:guest35
+ 1@example.invalid;mailto:guest352@example.invalid;mailto:guest353@example.
+ invalid;mailto:guest354@example.invalid;mailto:guest355@example.invalid;ma
+ ilto:guest356@example.invalid;mailto:guest357@example.invalid;mailto:guest
+ 358@example.invalid;mailto:guest359@example.invalid;mailto:guest360@exampl
+ e.invalid;mailto:guest361@example.invalid;mailto:guest362@example.invalid;
+ mailto:guest363@example.invalid;mailto:guest364@example.invalid;mailto:gue
+ st365@example.invalid;mailto:guest366@example.invalid;mailto:guest367@exam
+ ple.invalid;mailto:guest368@example.invalid;mailto:guest369@example.invali
+ d;mailto:guest370@example.invalid;mailto:guest371@example.invalid;mailto:g
+ uest372@example.invalid;mailto:guest373@example.invalid;mailto:guest374@ex
+ ample.invalid;mailto:guest375@example.invalid;mailto:guest376@example.inva
+ lid;mailto:guest377@example.invalid;mailto:guest378@example.invalid;mailto
+ :guest379@example.invalid;mailto:guest380@example.invalid;mailto:guest381@
+ example.invalid;mailto:guest382@example.invalid;mailto:guest383@example.in
+ valid;mailto:guest384@example.invalid;mailto:guest385@example.invalid;mail
+ to:guest386@example.invalid;mailto:guest387@example.invalid;mailto:guest38
+ 8@example.invalid;mailto:guest389@example.invalid;mailto:guest390@example.
+ invalid;mailto:guest391@example.invalid;mailto:guest392@example.invalid;ma
+ ilto:guest393@example.invalid;mailto:guest394@example.invalid;mailto:guest
+ 395@example.invalid;mailto:guest396@example.invalid;mailto:guest397@exampl
+ e.invalid;mailto:guest398@example.invalid;mailto:guest399@example.invalid
+DTSTAMP:20261120T120000Z
+UID:evt0011abc@google.com
+CREATED:20260101T000000Z
+LAST-MODIFIED:20261101T000000Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Duration talk
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261123T200000Z
+DTEND:20261123T203000Z
+DTSTAMP:20261120T120000Z
+UID:evt0012abc@google.com
+CREATED:20260101T000000Z
+LAST-MODIFIED:20261101T000000Z
+SEQUENCE:0
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261123T213000Z
+DTEND:20261123T220000Z
+DTSTAMP:20261120T120000Z
+UID:evt0013abc@google.com
+CREATED:20260101T000000Z
+LAST-MODIFIED:20261101T000000Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Plan\, budget\; review\nnotes
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261123T230000Z
+DTEND:20261124T000000Z
+DTSTAMP:20261120T120000Z
+UID:evt0014abc@google.com
+CREATED:20260101T000000Z
+LAST-MODIFIED:20261101T000000Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Gym
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:This is an event reminder
+SUMMARY:Alarm summary must be ignored
+TRIGGER:-P0DT0H30M0S
+DTSTART:20261123T010000Z
+END:VALARM
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261123T120000Z
+DTEND:20261123T123000Z
+DTSTAMP:20261120T120000Z
+UID:evt0015abc@google.com
+CREATED:20260101T000000Z
+LAST-MODIFIED:20261101T000000Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Quarterly planning session with the extended product and design tea
+ ms
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261123T150000Z
+DTEND:20261123T160000Z
+UID:cafe0001@google.com
+SUMMARY:Caf√
+ © cr√®me tasting
+END:VEVENT
+BEGIN:VTODO
+DTSTART:20261123T150000Z
+SUMMARY:A to-do, not an event
+END:VTODO
+BEGIN:VJOURNAL
+DTSTART:20261123
+SUMMARY:A journal entry
+END:VJOURNAL
+END:VCALENDAR
