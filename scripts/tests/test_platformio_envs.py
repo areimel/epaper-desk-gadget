@@ -17,14 +17,12 @@ class DefaultEnvsTests(unittest.TestCase):
 
     def test_default_envs_exclude_aliases_and_native(self):
         options = {
-            "sticks3": {},
-            "esp32": {},
-            "esp32c3": {},
-            "sticks3-macro": {"custom_board": "sticks3"},
+            "wireless-paper": {},
+            "wireless-paper-alt": {"custom_board": "wireless-paper"},
             "native": {},
-            "esp32s3": {"custom_board": "esp32s3"},
+            "unknown-board": {},
         }
-        self.assertEqual(default_envs(options, BOARDS), ["sticks3", "esp32", "esp32c3", "esp32s3"])
+        self.assertEqual(default_envs(options, BOARDS), ["wireless-paper"])
 
 
 if __name__ == "__main__":

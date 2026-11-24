@@ -12,7 +12,7 @@ from packaging_support import SECRET, PackagingCase  # noqa: E402
 class PackagingSecretTests(PackagingCase):
     def write_secrets(self, text):
         (self.root / "secrets.yaml").write_text(text)
-        for env in ("sticks3", "esp32", "esp32c3"):
+        for env in ("esp32s3", "esp32", "esp32c3"):
             self.make_build(env)
 
     def assert_secret_absent(self, pattern="*"):
@@ -24,12 +24,12 @@ class PackagingSecretTests(PackagingCase):
         self.package()  # a clean earlier package must survive the refusal untouched
         before = (self.output / "index.json").read_bytes()
         self.write_secrets(f"ota_password: {SECRET}\nwifi_ssid: homenet-{SECRET}\nwifi_password: pw-{SECRET}\n")
-        self.assertIn(SECRET.encode(), (self.root / ".pio/build/sticks3/firmware.bin").read_bytes())
+        self.assertIn(SECRET.encode(), (self.root / ".pio/build/esp32s3/firmware.bin").read_bytes())
         with self.assertRaises(ValueError) as caught:
             self.package()
         message = str(caught.exception)
         self.assertNotIn(SECRET, message)
-        for expected in ("sticks3", "secrets.yaml", "ota_password", "wifi_ssid", "wifi_password",
+        for expected in ("esp32s3", "secrets.yaml", "ota_password", "wifi_ssid", "wifi_password",
                          "without secrets.yaml", "--allow-secrets"):
             self.assertIn(expected, message)
         self.assertEqual(before, (self.output / "index.json").read_bytes())
@@ -63,7 +63,7 @@ class PackagingSecretTests(PackagingCase):
             self.package(allow_secrets=True)
         warning = err.getvalue()
         self.assertIn("WARNING", warning)
-        self.assertIn("sticks3", warning)
+        self.assertIn("esp32s3", warning)
         self.assertIn("do not publish", warning)
         self.assertNotIn(SECRET, warning)
         self.assert_secret_absent("*.json")  # manifests and index.json never carry secrets

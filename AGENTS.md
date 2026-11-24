@@ -1,15 +1,16 @@
-# ESP32 Starter Template
+# Desk Gadget (Heltec Wireless Paper)
 
 ## Working agreements
 
-- This is a template: keep the default app small and readable, prefer clear
-  modules over extra features, and do not add network services, runtime
-  configuration systems or captive portals without a request. The only runtime
-  configuration is WiFi credentials provisioned over Improv Serial.
-- Targets are the envs in `platformio.ini`: `sticks3`, `esp32s3`, `esp32c3`,
-  `esp32`, `sticks3-macro` and `native`, on the pinned pioarduino platform
-  (Arduino-ESP32 3.3.x), NimBLE, M5Unified and M5GFX. Do not bump pins without
-  a build of every env.
+- This is an e-paper desk dashboard built from the ESP32 starter template.
+  Keep modules small and readable. The device serves an unauthenticated HTTP
+  API and web app on the LAN; the feed is runtime configuration stored in
+  LittleFS. Do not add captive portals or other network services without a
+  request. WiFi credentials are provisioned over Improv Serial.
+- Targets are the envs in `platformio.ini`: `wireless-paper` (Heltec Wireless
+  Paper V1.1, ESP32-S3, 8 MB flash, no PSRAM) and `native` (host tests), on the
+  pinned pioarduino platform (Arduino-ESP32 3.3.x). Do not bump pins without a
+  build of the firmware env.
 - Preserve user changes. Do not push commits unless requested. Use a TODO list
   and focused local commits with descriptive titles and bodies. Keep parallel
   workstreams on distinct files and coordinate shared interfaces.
@@ -18,10 +19,10 @@
 
 | Fact | Lives in | Never also in |
 |---|---|---|
-| Project name, BLE name, module switches, gestures, buttons | `config.yaml` | firmware, web copy, generated headers (`generated_config.h` is generated, ignored) |
+| Project name, module switches, gestures | `config.yaml` | firmware, web copy, generated headers (`generated_config.h` is generated, ignored) |
 | Version | git tag or `--version`; fallback `git describe --tags --always`, then `0.0.0-dev` | `config.yaml` |
 | Build facts: board, partitions, flash, memory type | `platformio.ini` | `boards/boards.yaml` |
-| Board capabilities: label, chip, buttons or pins, LED, display, battery, driver | `boards/boards.yaml` | `platformio.ini` |
+| Board capabilities: label, chip, buttons or pins, LED, power pin, e-paper pins and panel, driver | `boards/boards.yaml` | `platformio.ini` |
 | Bootloader offset | one map in `scripts/firmware_images.py` (`ESP32` 0x1000, others 0x0) | elsewhere |
 | OTA password, dev WiFi credentials | gitignored `secrets.yaml` | `config.yaml`, tests, fixtures, manifests, `index.json` |
 | Site project copy | `firmware/index.json` (from `config.yaml`), then `web/src/content/site.ts` | duplicated literals |
@@ -34,72 +35,59 @@
   `ota_password` in `secrets.yaml` all hold. CI and release builds have no
   secrets file, so they ship with OTA off.
 - **Gating:** every optional module's `.cpp` is wrapped in `#if FEATURE_<X>`
-  (`FEATURE_BLE_HID`, `FEATURE_WIFI`, `FEATURE_OTA`, `FEATURE_DISPLAY`). Do not
-  rely on `lib_ldf_mode`. `FEATURE_DISPLAY` also needs a board with a display.
+  (`FEATURE_WIFI`, `FEATURE_OTA`, later `FEATURE_EPAPER`). Do not rely on
+  `lib_ldf_mode`. Pure libraries include no Arduino headers.
 - **Serial:** never block waiting for USB serial. Improv Serial shares the log
-  port and must tolerate non-Improv bytes.
+  port (UART0 through the CP2102; no USB-CDC flags) and must tolerate non-Improv
+  bytes.
 - **Reflash safety:** the web installer must never write inside the NVS
   partition. Parts stay separate (bootloader, partitions, boot_app0, firmware);
   no merged image; `new_install_prompt_erase: true`.
 - **File size:** every source file stays at or under 300 lines (README at or
   under 250). Anything repeated three or more times becomes a shared helper or
   component.
-- **HID descriptor:** unchanged. Changing it requires telling users to forget
-  the device and re-pair.
-- **Keep Bluetooth awake.** Do not add automatic sleep without considering
-  missed input and reconnect delay.
+- **Panel:** full refresh on page change and at least hourly; fast refresh
+  only for the clock minute tick, full after 5 fast. Text is black on white,
+  never on dither, with strokes of at least 2 px.
+- **HTTPS:** use the core CA bundle; `setInsecure()` is forbidden. One TLS
+  session at a time and no fetch before NTP sync. The calendar URL lives only
+  in `feed.json` on the device and is never returned by the API.
 - **Hardware claims:** report hardware behavior as pending unless observed.
-  Compile success is the only claim for `esp32c3` and `esp32`. Make no battery
-  life claims.
+  Compile success proves only that it compiles. Make no battery life claims.
 
 ## Module boundaries
 
-- `examples/macro-clicker/include/Macro.h` (`Stroke`, `Macro`, `Profile`) and the
-  other `examples/macro-clicker/` sources belong to the example only; the
-  default app does not include them.
 - `scripts/generate_config.py` plus `scripts/config/core.py` and
-  `scripts/config/sections/*.py` validate YAML and compile combos and labels into
+  `scripts/config/sections/*.py` validate YAML and compile settings into
   `generated_config.h`; firmware never parses key names or text. Each section
   exports `KEY`, `REQUIRED`, `DEFAULT`, `INCLUDES`, `validate(value, ctx)`,
   `emit(cfg, ctx)` and optionally `features(cfg, ctx)`. Unknown keys are errors
   reported with the key path. `scripts/platformio_config.py` runs it before each
-  build and defines the `BOARD_*` and `FEATURE_*` macros.
+  build and defines the `BOARD_*` and `FEATURE_*` macros from
+  `scripts/config/boards.py` (unknown driver or panel is a `ConfigError`).
 - `lib/core`: `Log.h` and `Every.h`. Pure, no hardware.
-- `lib/board`: `Board.h` and `BootHold.h`, with `BoardM5.cpp` or
-  `BoardGpio.cpp` chosen by `BOARD_DRIVER_*`. The only place that touches
-  button pins, the status LED, battery or the M5 display handle.
-- `lib/input/src/Gesture.h`: pure, header-only, host-tested; no Arduino or
-  hardware includes.
+- `lib/board`: `Board.h`, `BootHold.h` and `BoardHeltec.cpp` (`BOARD_DRIVER_HELTEC`).
+  The only place that touches the button pin, status LED and peripheral power.
+- `lib/input/src/Gesture.h`: pure, header-only, host-tested.
 - `lib/store`: `Settings` wraps NVS (Preferences) and skips unchanged writes.
-- `lib/ble_hid`: HID transport only, one keystroke at a time, paced by
-  `keystroke_ms`; no queue, no macro logic. `FEATURE_BLE_HID`.
 - `lib/improv`: pure Improv Serial codec, host-tested.
 - `lib/net`: WiFi, Improv Serial handler and ArduinoOTA. Improv is non-blocking
   and advanced by `net::updateImprov()`: 15 s connection timeout, credentials
   persisted only after success, previous credentials restored on failure.
-  `FEATURE_WIFI`, `FEATURE_OTA`.
-- `lib/display` (`Display.h`, `Theme.h`, shared `Draw.h`/`Draw.cpp` helpers) and `src/StatusView.{h,cpp}`: render a
-  plain model; no input logic. `FEATURE_DISPLAY`.
-- `src/main.cpp`: wiring only: board -> gestures -> keyboard -> status view.
+  `FEATURE_WIFI`, `FEATURE_OTA`. Planned here: `Fetcher`, `Clock` (NTP), `Api`
+  routes and `FeedFile` (LittleFS).
+- Planned (see `docs/superpowers/specs/2026-11-23-desk-gadget-design.md`):
+  `lib/epaper` (`Panel`, `Canvas`, `Draw`; `FEATURE_EPAPER`), `lib/text`,
+  `lib/feed` and `lib/sources` (pure, host-tested), `src/pages/*.cpp` (one view
+  per page: plain model in, canvas out, no input logic), `device-ui/` (the web
+  app embedded in firmware). Add them to this list as they land.
+- `src/main.cpp`: wiring only.
 - `scripts/package_firmware.py` and `scripts/firmware_images.py`: read build
   outputs, validate images and the NVS-overlap guard, write ESP Web Tools
-  manifests and `index.json`.
+  manifests and `index.json`. Their tests use `scripts/tests/fixtures/boards.yaml`
+  (an S3, a C3 and a classic ESP32 row), not the real board table.
 - `web/` is the independent Astro site. It reads everything from the packaged
   `index.json` and `src/content/site.ts`; it does not duplicate `config.yaml`.
-
-## examples/macro-clicker
-
-Built by env `sticks3-macro`; it has its own `config.yaml`, `config_schema.py`
-(`profiles` section), sources and native tests (`test_macro_*`,
-`scripts/tests/test_macro_schema.py`). Profiles stay compile-time; the only
-runtime state is the remembered active profile index. When changing it,
-preserve: one-shot long presses, release suppression after a long press,
-explicit HID key release, discarding input during disconnection, aborting
-playback on any new press, the A+B chord (which cancels pending gestures so
-releases fire nothing), and never replaying or resuming a macro after a
-disconnect or abort. The picker must keep working while disconnected; macros
-play only when the link is ready. Never put secrets in macro text: it is typed
-in clear and embedded in the manifest.
 
 ## Build and validation
 
@@ -121,9 +109,8 @@ environment must contain PyYAML for the pre-build generator.
 - Keep the README, `docs/`, `config.yaml` comments and the validation limits in
   `scripts/config/sections/*.py` aligned. Do not copy a limit into docs without
   checking the code.
-- Do not claim a successful compile proves Bluetooth pairing, button identity,
-  display rendering, typing reliability, WiFi provisioning, OTA or battery
-  runtime.
+- Do not claim a successful compile proves button behaviour, e-paper rendering,
+  WiFi provisioning, OTA or battery runtime.
 
 ## Flashing safety
 
@@ -131,6 +118,8 @@ Before flashing, reidentify the intended USB device and verify its chip and
 flash identity. Flash only within the user's authorization. Port names are
 examples, not stable device identifiers. Close serial monitors before uploading.
 Never run erase, upload or `espota` against a device the user has not named.
+The only flash target is the CP2102 device (`10c4:ea60`, serial `0001`), re-identified
+with esptool before every upload.
 Report physical checks as pending unless observed or confirmed by the user, and
 record them in `TODO.md`.
 

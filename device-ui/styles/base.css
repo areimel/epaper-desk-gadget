@@ -1,0 +1,85 @@
+/* Element defaults: type, form controls, focus. */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--desk);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--size-m);
+  line-height: 1.5;
+}
+
+h1, h2, h3 { line-height: 1.2; margin: 0; font-weight: 700; }
+h1 { font-size: var(--size-xl); letter-spacing: -0.01em; }
+h2 { font-size: var(--size-l); }
+p { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+strong { font-weight: 700; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+button {
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+  border: var(--line) solid var(--ink);
+  border-radius: var(--radius);
+  background: transparent;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { background: var(--paper); }
+button:disabled { border-color: var(--graphite); color: var(--graphite); cursor: not-allowed; }
+button.primary { background: var(--ink); color: var(--desk); }
+button.primary:hover:not(:disabled) { background: #000; }
+button.primary:disabled { background: var(--graphite); color: var(--desk); }
+button.link {
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  font-weight: 400;
+}
+button.link:hover { background: none; text-decoration-thickness: 2px; }
+
+input[type="text"], input[type="search"], input[type="url"], input[type="number"], select, textarea {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border: var(--line) solid var(--ink);
+  border-radius: var(--radius);
+  background: #fff;
+}
+textarea { resize: vertical; line-height: 1.4; }
+input[aria-invalid="true"], textarea[aria-invalid="true"], select[aria-invalid="true"] {
+  border-color: var(--red-pencil);
+  border-width: 3px;
+}
+input[type="checkbox"], input[type="radio"] {
+  width: 1.25rem; height: 1.25rem; margin: 0;
+  accent-color: var(--ink);
+}
+
+/* Focus: ink ring over a highlighter stroke, visible on paper and desk. */
+:focus { outline: none; }
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 7px var(--highlighter);
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.skip { position: absolute; left: -999px; top: var(--space-2); }
+.skip:focus { left: var(--space-2); background: var(--highlighter); padding: var(--space-2) var(--space-3); color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

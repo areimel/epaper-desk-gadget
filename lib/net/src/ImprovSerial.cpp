@@ -3,6 +3,7 @@
 #if FEATURE_WIFI
 #include <WiFi.h>
 #include <esp_wifi.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "Improv.h"
@@ -11,7 +12,7 @@
 
 // Provisioning is a non-blocking state machine advanced by updateImprov():
 //   WifiSettings RPC -> Provisioning sent, attempt started (RAM-only credentials)
-//   each poll: connected -> persist credentials, Provisioned + empty result (no web server to visit)
+//   each poll: connected -> persist credentials, Provisioned + result (device URL with the dashboard)
 //              15 s elapsed -> restore the previous credentials and storage mode, UnableToConnect,
 //                              back to Authorized
 // Nothing is written to flash until the connection succeeds, so a failed attempt never overwrites
@@ -42,8 +43,22 @@ void sendResult(ImprovCommand c, const char* const* strings, uint8_t count) {
   if (n) Serial.write(f, n);
 }
 
-// No redirect URL: the device serves no web page, so the installer must not offer a "Visit device" link.
-void sendProvisionedResult() { sendResult(ImprovCommand::WifiSettings, nullptr, 0); }
+// With the dashboard compiled in, the result carries the device URL ("http://<ip>/") so the
+// installer offers "Visit device". Read from the driver, not net::ipAddress(), which only fills
+// in on the next updateWifi(). Without the dashboard there is no page to visit: no URL.
+void sendProvisionedResult() {
+#if FEATURE_DASHBOARD
+  char url[24];
+  const IPAddress ip = WiFi.localIP();
+  snprintf(url, sizeof url, "http://%u.%u.%u.%u/", ip[0], ip[1], ip[2], ip[3]);
+  const char* strings[1] = {url};
+  if (ip != IPAddress(0, 0, 0, 0)) {
+    sendResult(ImprovCommand::WifiSettings, strings, 1);
+    return;
+  }
+#endif
+  sendResult(ImprovCommand::WifiSettings, nullptr, 0);
+}
 
 ImprovState currentState() {
   if (connecting) return ImprovState::Provisioning;

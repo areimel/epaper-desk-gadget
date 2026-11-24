@@ -8,9 +8,9 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from support import ROOT, BOARDS, default_config  # noqa: E402 (also sets sys.path)
+from support import ROOT, default_config  # noqa: E402 (also sets sys.path)
 import yaml
-from config.core import Context, load_secrets
+from config.core import Context, UniqueKeyLoader, load_secrets
 from generate_config import render
 from package_firmware import package
 
@@ -18,6 +18,8 @@ CHIP_IDS = {"ESP32": 0, "ESP32-S3": 9, "ESP32-C3": 5}
 DEFAULT_PARTS = [("nvs", 1, 2, 0x9000, 0x5000), ("otadata", 1, 0, 0xE000, 0x2000),
                  ("app0", 0, 0x10, 0x10000, 0x140000), ("spiffs", 1, 0x82, 0x150000, 0x20000)]
 SECRET = "hunter2-ota-secret"
+FIXTURE_BOARDS = ROOT / "scripts/tests/fixtures/boards.yaml"
+BOARDS = yaml.load(FIXTURE_BOARDS.read_text(encoding="utf-8"), Loader=UniqueKeyLoader)
 
 
 def synthetic_image(chip_id, payload=b"test payload"):
@@ -52,10 +54,10 @@ class PackagingCase(unittest.TestCase):
             real / "packages/tool-esptoolpy", target_is_directory=True)
         (self.core / "penv").symlink_to(real / "penv", target_is_directory=True)
         (self.root / "boards").mkdir(parents=True)
-        (self.root / "boards/boards.yaml").write_bytes((ROOT / "boards/boards.yaml").read_bytes())
+        (self.root / "boards/boards.yaml").write_bytes(FIXTURE_BOARDS.read_bytes())
         self.write_config(default_config())
-        self.options = {"sticks3": {}, "esp32": {}, "esp32c3": {}, "sticks3-macro": {"custom_board": "sticks3"}}
-        for env in ("sticks3", "esp32", "esp32c3"):
+        self.options = {"esp32s3": {}, "esp32": {}, "esp32c3": {}, "esp32s3-alias": {"custom_board": "esp32s3"}}
+        for env in ("esp32s3", "esp32", "esp32c3"):
             self.make_build(env)
 
     def write_config(self, config):
@@ -76,7 +78,7 @@ class PackagingCase(unittest.TestCase):
         (build / "partitions.bin").write_bytes(partition_table(parts))
 
     def package(self, **kwargs):
-        kwargs.setdefault("envs", ["sticks3", "esp32", "esp32c3"])
+        kwargs.setdefault("envs", ["esp32s3", "esp32", "esp32c3"])
         return package(self.root, self.output, "v1.0.0", "a" * 40, platformio_dir=self.core,
                        env_options=self.options, **kwargs)
 

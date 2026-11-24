@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Desk Gadget</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/app.css">
+<link rel="preload" href="fonts/atkinson-hyperlegible-next-latin.woff2" as="font" type="font/woff2" crossorigin>
+<script type="module" src="js/main.js"></script>
+</head>
+<body class="booting">
+<a class="skip" href="#pages-title">Skip to pages</a>
+<header class="top">
+  <h1>Desk Gadget</h1>
+  <p id="device" class="meta"></p>
+</header>
+
+<main>
+  <section class="hero" aria-label="The gadget's screen now">
+    <div class="bezel">
+      <canvas id="live" class="screen loading" width="250" height="122" role="img"
+        aria-label="The screen on the gadget now"></canvas>
+    </div>
+    <p id="live-caption" class="caption" aria-live="polite">Loading the screen from the gadget...</p>
+    <button id="retry" type="button" hidden>Try again</button>
+  </section>
+
+  <section class="health" aria-labelledby="health-title">
+    <h2 id="health-title">Data</h2>
+    <ul id="sources" class="sources"></ul>
+    <div class="actions">
+      <button id="refresh" type="button">Refresh data now</button>
+    </div>
+    <p id="notice" class="notice" role="status"></p>
+  </section>
+
+  <section class="pages" aria-labelledby="pages-title">
+    <h2 id="pages-title" tabindex="-1">Pages</h2>
+    <div class="field dwell">
+      <span class="inline">
+        <label for="f-dwellSec">Change page every</label>
+        <input id="f-dwellSec" type="number" inputmode="numeric" step="1" required
+          aria-describedby="f-dwellSec-hint f-dwellSec-error">
+        <span>minutes</span>
+      </span>
+      <p id="f-dwellSec-hint" class="hint"></p>
+      <p id="f-dwellSec-error" class="field-error" hidden></p>
+    </div>
+    <p id="queue-help" class="hint">The gadget shows the pages that are on, in this order. Drag a screen or use the arrows to move it; on a focused screen, Alt and an arrow key also move it. Pick a screen to change its settings.</p>
+    <div id="queue"></div>
+    <section id="editor" class="editor" aria-labelledby="editor-title" hidden></section>
+  </section>
+</main>
+
+<div id="savebar" class="savebar" hidden>
+  <p id="save-status" role="status" aria-live="polite"></p>
+  <div class="actions">
+    <button id="discard" type="button">Discard changes</button>
+    <button id="save" type="button" class="primary">Save changes</button>
+  </div>
+</div>
+</body>
+</html>

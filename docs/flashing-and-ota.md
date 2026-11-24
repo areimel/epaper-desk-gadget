@@ -1,39 +1,42 @@
 # Flashing, OTA and releases
 
-Pick how you get firmware onto a board: USB upload from PlatformIO, the browser
-installer built from a release, or OTA for development builds. None of these
-has been exercised on hardware yet; see [../TODO.md](../TODO.md).
+Pick how you get firmware onto the Wireless Paper: USB upload from PlatformIO,
+the browser installer built from a release, or OTA for development builds. The
+only upload observed so far is the panel test card; the rest is pending, see
+[../TODO.md](../TODO.md).
 
 ## USB upload
 
 ```sh
 .venv/bin/pio device list                    # identify the board
-.venv/bin/pio run -e esp32c3 -t upload
+.venv/bin/pio run -e wireless-paper -t upload
 .venv/bin/pio device monitor
 ```
 
-- Port names (`/dev/ttyACM0`, `COM5`) are examples, not stable identifiers.
-  Reidentify the board after every reconnect, and confirm the chip and flash
-  size match the env before writing anything.
+- Port names (`/dev/ttyUSB0`, `COM5`) are examples, not stable identifiers.
+  Re-identify the board after every reconnect, confirm the chip (ESP32-S3) and
+  8 MB flash with esptool before writing anything, and flash only a device you
+  have named. The board's bridge is a CP2102 (`10c4:ea60`).
 - Close the serial monitor before uploading.
 - Pin a port locally in `platformio_override.ini` (gitignored):
-  `upload_port = /dev/ttyACM0`.
-- If the port does not appear, use a data cable and put the board in download
-  mode (commonly: hold BOOT while connecting power or pressing reset; the exact
-  sequence is board specific and not verified here).
-- A normal upload is expected to keep NVS (bonds and WiFi credentials survive), because it does not rewrite that partition. Not yet observed; pending a physical check.
+  `upload_port = /dev/ttyUSB0`.
+- If the port does not appear, use a data cable. The board's USB bridge is on
+  UART0, so a normal upload needs no download-mode button sequence; the exact
+  recovery steps for a bad flash are not verified here.
+- A normal upload is expected to keep NVS (stored WiFi credentials survive),
+  because it does not rewrite that partition. Not yet observed.
 
 ### Recovery
 
 ```sh
-.venv/bin/pio run -e esp32c3 -t erase        # erases the whole flash, including NVS
-.venv/bin/pio run -e esp32c3 -t upload
+.venv/bin/pio run -e wireless-paper -t erase   # erases the whole flash, including NVS
+.venv/bin/pio run -e wireless-paper -t upload
 ```
 
-After an erase, WiFi must be provisioned again and the host must pair again.
-If Bluetooth will not connect after an update, forget the device on the host and
-pair again; hold every button at boot to clear the device's bonds first (hold
-times: [getting-started.md](getting-started.md#4-use-the-default-app)).
+After an erase, WiFi must be provisioned again and the stored feed
+(`feed.json`, in the LittleFS partition) is gone, so the web app starts from
+the defaults. Only run erase against a device you have identified and the user
+has authorised.
 
 ## Browser installer
 
@@ -44,14 +47,14 @@ What it writes, per board (`<board>/manifest.json`):
 
 | Part | Offset |
 |---|---|
-| `bootloader.bin` | `0x1000` on ESP32, `0x0` on ESP32-S3 and ESP32-C3 |
+| `bootloader.bin` | `0x0` on the ESP32-S3 (the offset map is in `scripts/firmware_images.py`) |
 | `partitions.bin` | `0x8000` |
 | `boot_app0.bin` | the `otadata` partition offset from that board's `partitions.bin` |
 | `firmware.bin` | the first `app` partition offset |
 
 No merged image is used and nothing is written inside the NVS partition, so a
-normal install is expected to keep bonds and WiFi credentials (pending a
-physical check). The packager checks the layout per
+normal install is expected to keep stored WiFi credentials (pending a physical
+check). The packager checks the layout per
 board and fails if any part overlaps NVS or the app is larger than its
 partition. The manifest sets `new_install_prompt_erase: true`, so the installer
 offers an erase and you choose. With `wifi.enabled: true` the manifest sets
@@ -82,12 +85,10 @@ cd web && npm ci && npm run build
 | `--project DIR` | Repository root; default is this repository |
 | `--allow-secrets` | Package even though `secrets.yaml` sets a value or OTA is compiled in; prints a warning. Local use only, never publish the output |
 
-Aliases such as `sticks3-macro` (a different env on the `sticks3` board) are not
-packaged by default; use `--env sticks3-macro` to publish one instead of
-`sticks3`. Two envs on the same board cannot be packaged in one run. All
-packaged boards must share one config file, because `index.json` holds a copy
-of the parsed `config.yaml`, so it must contain no secrets. Output: `index.json` (schema version 2) plus a directory
-per board holding the four `.bin` files and `manifest.json`.
+Two envs on the same board cannot be packaged in one run. `index.json` holds a
+copy of the parsed `config.yaml`, so that file must contain no secrets. Output:
+`index.json` (schema version 2) plus a directory per board holding the four
+`.bin` files and `manifest.json`.
 
 If `web/public/firmware/` is absent, `npm run build` still succeeds and the
 site shows a "No release published yet" state. If it is present, the build
@@ -127,29 +128,26 @@ To use it on your own device:
    `platformio_override.ini`:
 
    ```ini
-   [env:esp32c3]
+   [env:wireless-paper]
    upload_protocol = espota
-   upload_port = esp32-starter.local   ; wifi.hostname, or the device IP
+   upload_port = desk-gadget.local   ; wifi.hostname, or the device IP
    upload_flags = --auth=<your ota_password>
    ```
 
-   then `.venv/bin/pio run -e esp32c3 -t upload`.
+   then `.venv/bin/pio run -e wireless-paper -t upload`.
 
 Behavior and limits:
 
 - The OTA hostname is `wifi.hostname`; the password is compiled into the image.
   Do not distribute binaries built with a real `secrets.yaml`; the packager
   refuses them unless given `--allow-secrets`.
-- A transfer runs inside `net::updateOta()`, so the app loop does not run
-  during it. As it starts, the default app releases any held key and shows
-  `OTA UPDATING`; presses during the transfer are never read. Success restarts
-  the device. After a failed transfer the app resets its gesture state and
-  continues.
+- A transfer runs inside `net::updateOta()`, so the app loop (including the web
+  app and page rotation) does not run during it. Success restarts the device.
+- The panel keeps showing its last image during a transfer.
 - No rollback is implemented. A bad OTA image needs a USB reflash.
-- OTA needs room for a second app partition. With the default config the C3
-  OTA image is larger than its app partition (measured, see
-  [boards.md](boards.md#memory)); drop a module first, and check the
-  `firmware.bin` size, not only the `Flash:` line.
+- OTA needs room for a second app partition. The 8 MB layout in
+  `default_8MB.csv` has two. Check the `firmware.bin` size against the app
+  partition after adding code.
 - The `espota` upload commands above are documented from PlatformIO's
   conventions and have not been run.
 
@@ -179,3 +177,12 @@ git push origin vX.Y.Z
 (Documented, not run: the release workflow has not been executed.) CI (`.github/workflows/ci.yml`) runs on pull requests and pushes to
 `main`: one build job per env, the host and packaging checks, and the site
 checks. Its jobs and local equivalents are in [testing.md](testing.md).
+
+## Licences
+
+The repository's own source is MIT. Firmware binaries link GxEPD2 (GPL-3.0), so
+**published binaries, including the ones the installer writes, are GPL-3.0**.
+The corresponding source is this repository at the commit recorded in
+`index.json`. Third-party details are in
+[../THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md); say the same in release
+notes.

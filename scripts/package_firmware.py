@@ -13,9 +13,8 @@ import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from config.boards import firmware_version, load_boards  # noqa: E402
+from config.boards import button_count, firmware_version, load_boards  # noqa: E402
 from config.core import ConfigError, Context, load_secrets, load_yaml  # noqa: E402
-from config.sections.buttons import button_count  # noqa: E402
 from firmware_images import (  # noqa: E402
     BOOT_APP0_SIZE, PARTITIONS_OFFSET, bootloader_offset, check_parts, flash_layout,
     image_parser, parse_partitions, validate_image,
@@ -41,7 +40,7 @@ def pio_env_options(project):
 
 
 def default_envs(options, boards):
-    """Envs whose board id equals the env name (so aliases like sticks3-macro are skipped)."""
+    """Envs whose board id equals the env name (so aliases like a custom_board alias env are skipped)."""
     return [env for env, opts in options.items()
             if env in boards and opts.get("custom_board", env) == env]
 

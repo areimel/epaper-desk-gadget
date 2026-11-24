@@ -1,13 +1,13 @@
 const otaNote =
   "Release builds have OTA disabled. OTA is for local development builds, enabled by an ota_password in your own secrets.yaml.";
 
-/** Generic template copy. Project identity from firmware/index.json overrides `project`. */
+/** Installer-site copy for the desk gadget. Project identity from firmware/index.json overrides `project`. */
 export const site = {
   project: {
-    name: "ESP32 Starter",
-    tagline: "A small, dependable starting point for ESP32 firmware.",
+    name: "Desk Gadget",
+    tagline: "An e-paper desk dashboard.",
     description:
-      "A PlatformIO and Arduino template for ESP32 boards with optional Bluetooth HID, WiFi, OTA and display modules, configured from a single YAML file and installable from the browser.",
+      "Clock, weather, Hacker News, messages, calendar and notes on a Heltec Wireless Paper e-paper display, edited from a web app the device serves on your WiFi.",
   },
   /** Source link for forks: REPO_URL, else GitHub Actions' repository, else none. */
   repository:
@@ -18,23 +18,23 @@ export const site = {
   noRelease:
     "No release published yet. Build locally with pio run, or publish a release to enable browser install.",
   otaNote,
-  /** Update this when more boards or behaviors have been observed on hardware. */
+  /** Update this when more behavior has been observed on hardware (see TODO.md). */
   hardwareNote:
-    "Hardware status: only the M5Stack Stick-S3 default app has been flashed and seen to boot. Nothing else has been observed on hardware (pairing, typing, display, Improv, OTA, other boards); the other boards are compile-checked only.",
+    "Hardware status: on one Heltec Wireless Paper the panel test card has been seen upright and readable. The six dashboard pages, WiFi setup, the web app and the button have not been observed on hardware yet.",
   settingsNote:
-    "The installer never writes the NVS settings partition, so the layout is meant to keep stored settings across a reflash unless you choose to erase. This has not been observed.",
+    "The installer never writes the NVS settings partition, so the layout is meant to keep stored WiFi credentials across a reflash unless you choose to erase. This has not been observed.",
   features: [
     {
-      title: "One config file",
-      body: "Name, Bluetooth, WiFi, display and button gestures live in config.yaml and are validated at build time.",
+      title: "Six pages, slowly turning",
+      body: "Clock, weather, Hacker News, messages, calendar and notes take turns on the e-paper screen. Pages turn every few minutes on purpose, to keep the panel calm.",
     },
     {
-      title: "Board profiles",
-      body: "Pick an ESP32, ESP32-S3, ESP32-C3 or M5Stack Stick-S3 environment; board capabilities come from one table.",
+      title: "Edit it from your phone",
+      body: "The device serves a small web app on your WiFi. Reorder pages, set your city, write messages and notes, and preview exactly what the panel shows.",
     },
     {
-      title: "Optional modules",
-      body: "Bluetooth HID, WiFi with Improv provisioning, OTA and display are compiled in only when enabled.",
+      title: "No account, no cloud",
+      body: "The device fetches weather and headlines itself. Your calendar link stays on the device. The web app has no login, so anyone on your WiFi can edit it.",
     },
     {
       title: "Safe browser flashing",
@@ -42,10 +42,10 @@ export const site = {
     },
   ],
   steps: [
-    "Connect your board over USB with a data cable.",
-    "Choose your board and press Install.",
-    "Pick the serial port in the browser prompt and confirm.",
-    "Wait for the flash to finish, then follow any WiFi or pairing prompts.",
+    "Connect the Heltec Wireless Paper over USB with a data cable.",
+    "Press Install, pick the serial port in the browser prompt and confirm.",
+    "When the flash finishes, enter your WiFi name and password in the setup dialog.",
+    "Open the address the installer shows (or http://desk-gadget.local) to set your city, messages and notes.",
   ],
   faq: [
     {
@@ -54,7 +54,19 @@ export const site = {
     },
     {
       q: "The port does not appear.",
-      a: "Use a USB data cable, close any serial monitor, and for some boards hold BOOT while plugging in to enter download mode.",
+      a: "Use a USB data cable and close any serial monitor. If it still does not show, unplug the board and plug it in again.",
+    },
+    {
+      q: "The screen did not change right away.",
+      a: "E-paper turns pages slowly on purpose, every few minutes. Press the button to move to the next page now, or hold it to refetch everything.",
+    },
+    {
+      q: "The web app does not open at desk-gadget.local.",
+      a: "The .local name depends on your network. Use the device's IP address instead; the installer shows it after WiFi setup.",
+    },
+    {
+      q: "Who can change what the screen shows?",
+      a: "Anyone on the same WiFi network. The web app has no login. Do not put anything private in a message or note.",
     },
     {
       q: "Does the released firmware support OTA updates?",
@@ -65,8 +77,8 @@ export const site = {
       a: "Reflash from this page and choose to erase the device (the erase option has not been tried on hardware), or run pio run -t erase followed by pio run -t upload.",
     },
     {
-      q: "Bluetooth will not pair after an update.",
-      a: "Forget the device in your system Bluetooth settings, then pair again.",
+      q: "What licence is the firmware under?",
+      a: "The project source is MIT. Firmware binaries link the GxEPD2 display driver and are distributed under GPL-3.0. See THIRD_PARTY_NOTICES.md in the repository.",
     },
   ],
 };

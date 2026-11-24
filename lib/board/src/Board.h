@@ -1,21 +1,15 @@
 #pragma once
 #include <Arduino.h>
 
-#if BOARD_HAS_DISPLAY
-#include <M5GFX.h>
-#endif
-
-// Hardware abstraction selected at build time by boards/boards.yaml
-// (BOARD_DRIVER_M5 or BOARD_DRIVER_GPIO). Nothing here blocks on USB serial.
+// Hardware abstraction selected at build time by boards/boards.yaml (BOARD_DRIVER_HELTEC).
+// This is the only place that touches button pins, the status LED or peripheral power.
+// Nothing here blocks on USB serial.
 namespace board {
-void begin(uint8_t brightness);  // M5.begin or pinMode; brightness ignored without a display
-void update();                   // poll buttons (M5.update on m5)
+void begin();              // pinMode setup; peripheral power starts off
+void update();             // poll buttons; consumers debounce
 uint8_t buttonCount();
-bool isPressed(uint8_t i);       // false for an out-of-range index
-int batteryPercent();            // -1 when the board has no battery gauge
-bool charging();
-void setStatusLed(bool on);      // no-op when BOARD_LED_PIN < 0
-#if BOARD_HAS_DISPLAY
-M5GFX& display();
-#endif
+bool isPressed(uint8_t i);  // false for an out-of-range index
+void setStatusLed(bool on);  // no-op when BOARD_LED_PIN < 0
+// Switches the board's peripheral rail (e-paper panel on the Wireless Paper). No-op without one.
+void setPeripheralPower(bool on);
 }  // namespace board

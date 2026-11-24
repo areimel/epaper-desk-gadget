@@ -1,0 +1,28 @@
+{
+  "v": 1,
+  "dwellSec": 300,
+  "tz": {"iana": "America/New_York", "posix": "EST5EDT,M3.2.0,M11.1.0"},
+  "pages": [
+    {"id": "clock", "on": true},
+    {"id": "weather", "on": true},
+    {"id": "hn", "on": true},
+    {"id": "messages", "on": true},
+    {"id": "calendar", "on": false},
+    {"id": "notes", "on": true}
+  ],
+  "weather": {"place": "Philadelphia", "lat": 39.95, "lon": -75.16, "units": "f"},
+  "calendar": {"set": false},
+  "messages": [
+    {"text": "You are doing better than you think.", "by": "your desk"},
+    {"text": "Drink some water. Unclench your jaw.", "by": ""},
+    {"text": "The best way out is always through.", "by": "Robert Frost"}
+  ],
+  "notes": {
+    "title": "Today",
+    "lines": [
+      {"text": "Ship the gadget", "todo": true, "done": false},
+      {"text": "Reply to Sam", "todo": true, "done": true},
+      {"text": "Dentist 3pm Thursday", "todo": false, "done": false}
+    ]
+  }
+}

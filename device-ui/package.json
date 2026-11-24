@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "Dev-only marker so Node treats device-ui/js as ES modules in tests. Not part of the web app.",
+  "scripts": {
+    "test": "node --test tests",
+    "mock": "node mock/server.mjs"
+  }
+}

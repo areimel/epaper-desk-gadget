@@ -30,9 +30,10 @@ def render(data, ctx, base=Path(".")):
         cfg = module.validate(data.get(module.KEY, module.DEFAULT), ctx)
         validated.append((module, cfg))
         features.update(getattr(module, "features", lambda c, x: {})(cfg, ctx))
-    if features.get("FEATURE_OTA") and not features.get("FEATURE_WIFI"):
-        features["FEATURE_OTA"] = False
-        ctx.warnings.append("OTA disabled: wifi.enabled is false")
+    for flag, label in (("FEATURE_OTA", "OTA"), ("FEATURE_DASHBOARD", "dashboard")):
+        if features.get(flag) and not features.get("FEATURE_WIFI"):
+            features[flag] = False
+            ctx.warnings.append(f"{label} disabled: wifi.enabled is false")
     ctx.features = features
     includes = sorted({inc for m, _ in validated for inc in getattr(m, "INCLUDES", ())})
     lines = [HEADER, "#pragma once", *[f"#include {inc}" for inc in includes], "",
