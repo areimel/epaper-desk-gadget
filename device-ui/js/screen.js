@@ -1,7 +1,5 @@
 // The /api/screen bitmap: rows of `rowBytes`, MSB first, set bit = ink.
 export const GEOM = Object.freeze({ w: 250, h: 122, rowBytes: 32 });
-export const PAPER = '#E3E5DC';
-export const INK = '#17191B';
 
 export function decodeScreen(bytes, geom = GEOM) {
   const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);

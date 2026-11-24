@@ -20,7 +20,7 @@ const round4 = (x) => Math.round(x * 1e4) / 1e4;
 export function parsePlaces(json, placeMax) {
   const list = Array.isArray(json?.results) ? json.results : [];
   return list
-    .filter((r) => typeof r.name === 'string' && Number.isFinite(r.latitude) && Number.isFinite(r.longitude))
+    .filter((r) => r && typeof r === 'object' && typeof r.name === 'string' && Number.isFinite(r.latitude) && Number.isFinite(r.longitude))
     .map((r) => ({
       place: cutBytes(r.name, placeMax),
       label: [r.name, r.admin1, r.country].filter(Boolean).join(', '),
@@ -41,5 +41,21 @@ export async function searchPlaces(name, placeMax, fetchImpl = globalThis.fetch)
   if (!res || !res.ok) {
     throw new Error("City search didn't work. This browser needs internet access for it; try again.");
   }
-  return parsePlaces(await res.json(), placeMax);
+  let json;
+  try {
+    json = await res.json();
+  } catch {
+    throw new Error('City search sent back something unexpected. Try again in a moment.');
+  }
+  return parsePlaces(json, placeMax);
+}
+
+// Out-of-order replies: call next() when a search starts; the function it
+// returns says whether that search is still the newest one.
+export function latestOnly() {
+  let n = 0;
+  return () => {
+    const mine = ++n;
+    return () => mine === n;
+  };
 }

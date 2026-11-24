@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { decodeScreen, GEOM, PAPER, INK, bestScale } from '../js/screen.js';
+import { decodeScreen, GEOM, bestScale } from '../js/screen.js';
 
 test('decodes 3904 bytes into 250x122 pixels, MSB is leftmost', () => {
   const bytes = new Uint8Array(3904);
@@ -37,9 +37,7 @@ test('custom geometry from /api/state screen', () => {
   assert.deepEqual([...px], [1, 1, 1, 1, 0, 0, 0, 0]);
 });
 
-test('palette and default geometry match the spec', () => {
-  assert.equal(PAPER, '#E3E5DC');
-  assert.equal(INK, '#17191B');
+test('default geometry matches the spec', () => {
   assert.deepEqual(GEOM, { w: 250, h: 122, rowBytes: 32 });
 });
 

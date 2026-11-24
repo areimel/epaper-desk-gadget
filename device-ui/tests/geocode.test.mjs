@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { geocodeUrl, parsePlaces, searchPlaces, cutBytes } from '../js/geocode.js';
+import { geocodeUrl, parsePlaces, searchPlaces, cutBytes, latestOnly } from '../js/geocode.js';
 
 const sample = {
   results: [
@@ -46,4 +46,23 @@ test('searchPlaces rejects with plain copy when the service fails', async () => 
   const fake = async () => ({ ok: false, status: 500, json: async () => ({}) });
   await assert.rejects(searchPlaces('x', 32, fake), /City search didn't work/);
   assert.deepEqual(await searchPlaces('  ', 32, fake), []);
+});
+
+test('parsePlaces skips null and malformed entries', () => {
+  const p = parsePlaces({ results: [null, 7, 'x', { name: 'Ok', latitude: 1, longitude: 2 }, {}, { name: 5, latitude: 1, longitude: 2 }] }, 32);
+  assert.deepEqual(p.map((x) => x.place), ['Ok']);
+});
+
+test('searchPlaces gives plain copy for a reply that is not JSON', async () => {
+  const fake = async () => ({ ok: true, json: async () => { throw new SyntaxError('Unexpected token < in JSON'); } });
+  await assert.rejects(searchPlaces('x', 32, fake), (e) => /City search/.test(e.message) && !/SyntaxError|token/.test(e.message));
+});
+
+test('latestOnly: only the newest search is current', () => {
+  const next = latestOnly();
+  const first = next();
+  assert.equal(first(), true);
+  const second = next();
+  assert.equal(first(), false);
+  assert.equal(second(), true);
 });

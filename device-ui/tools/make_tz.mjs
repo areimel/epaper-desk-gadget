@@ -6,7 +6,8 @@ const ZONEINFO = '/usr/share/zoneinfo';
 const OUT = new URL('../js/tz.js', import.meta.url);
 const MAX_POSIX = 47;
 
-const zones = new Set(['UTC']);
+// 'Etc/UTC' is the device's factory zone and zone.tab does not list it.
+const zones = new Set(['UTC', 'Etc/UTC']);
 for (const line of readFileSync(`${ZONEINFO}/zone.tab`, 'utf8').split('\n')) {
   if (!line || line.startsWith('#')) continue;
   const name = line.split('\t')[2];
@@ -65,8 +66,12 @@ const body = `const RAW = {\n${lines.join('\n')}\n};
 
 export const TZ = Object.freeze(RAW);
 
-export function posixFor(iana) {
-  return typeof iana === 'string' && Object.hasOwn(TZ, iana) ? TZ[iana] : null;
+// The saved zone ({iana, posix} from the device) keeps its own rule, so
+// re-selecting it never loses the rule even when the table lacks the name.
+export function posixFor(iana, saved) {
+  if (typeof iana !== 'string') return null;
+  if (Object.hasOwn(TZ, iana)) return TZ[iana];
+  return saved && saved.iana === iana && saved.posix ? saved.posix : null;
 }
 
 export function zoneNames() {

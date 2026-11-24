@@ -39,3 +39,16 @@ test('browserZone returns null or a known zone', () => {
   const zone = browserZone();
   assert.ok(zone === null || Object.hasOwn(TZ, zone), `unexpected ${zone}`);
 });
+
+test('Etc/UTC, the factory zone, is in the table', () => {
+  assert.equal(posixFor('Etc/UTC'), 'UTC0');
+  assert.ok(zoneNames().includes('Etc/UTC'));
+});
+
+test('the saved zone keeps its saved rule when the table lacks it', () => {
+  const saved = { iana: 'Mars/Olympus', posix: '<+04>-4' };
+  assert.equal(posixFor('Mars/Olympus', saved), '<+04>-4');
+  assert.equal(posixFor('Mars/Phobos', saved), null);
+  assert.equal(posixFor('Mars/Olympus', { iana: 'Mars/Olympus', posix: '' }), null);
+  assert.equal(posixFor('America/New_York', saved), 'EST5EDT,M3.2.0,M11.1.0');
+});

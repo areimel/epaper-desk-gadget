@@ -120,22 +120,23 @@ const RAW = {
   "Australia/Hobart": "AEST-10AEDT,M10.1.0,M4.1.0/3", "Australia/Lindeman": "AEST-10",
   "Australia/Lord_Howe": "<+1030>-10:30<+11>-11,M10.1.0,M4.1.0",
   "Australia/Melbourne": "AEST-10AEDT,M10.1.0,M4.1.0/3", "Australia/Perth": "AWST-8",
-  "Australia/Sydney": "AEST-10AEDT,M10.1.0,M4.1.0/3", "Europe/Amsterdam": "CET-1CEST,M3.5.0,M10.5.0/3",
-  "Europe/Andorra": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Astrakhan": "<+04>-4",
-  "Europe/Athens": "EET-2EEST,M3.5.0/3,M10.5.0/4", "Europe/Belgrade": "CET-1CEST,M3.5.0,M10.5.0/3",
-  "Europe/Berlin": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Bratislava": "CET-1CEST,M3.5.0,M10.5.0/3",
-  "Europe/Brussels": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Bucharest": "EET-2EEST,M3.5.0/3,M10.5.0/4",
-  "Europe/Budapest": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Busingen": "CET-1CEST,M3.5.0,M10.5.0/3",
-  "Europe/Chisinau": "EET-2EEST,M3.5.0/3,M10.5.0/4", "Europe/Copenhagen": "CET-1CEST,M3.5.0,M10.5.0/3",
-  "Europe/Dublin": "GMT0IST,M3.5.0/1,M10.5.0", "Europe/Gibraltar": "CET-1CEST,M3.5.0,M10.5.0/3",
-  "Europe/Guernsey": "GMT0BST,M3.5.0/1,M10.5.0", "Europe/Helsinki": "EET-2EEST,M3.5.0/3,M10.5.0/4",
-  "Europe/Isle_of_Man": "GMT0BST,M3.5.0/1,M10.5.0", "Europe/Istanbul": "<+03>-3",
-  "Europe/Jersey": "GMT0BST,M3.5.0/1,M10.5.0", "Europe/Kaliningrad": "EET-2", "Europe/Kirov": "MSK-3",
-  "Europe/Kyiv": "EET-2EEST,M3.5.0/3,M10.5.0/4", "Europe/Lisbon": "WET0WEST,M3.5.0/1,M10.5.0",
-  "Europe/Ljubljana": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/London": "GMT0BST,M3.5.0/1,M10.5.0",
-  "Europe/Luxembourg": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Madrid": "CET-1CEST,M3.5.0,M10.5.0/3",
-  "Europe/Malta": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Mariehamn": "EET-2EEST,M3.5.0/3,M10.5.0/4",
-  "Europe/Minsk": "<+03>-3", "Europe/Monaco": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Moscow": "MSK-3",
+  "Australia/Sydney": "AEST-10AEDT,M10.1.0,M4.1.0/3", "Etc/UTC": "UTC0",
+  "Europe/Amsterdam": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Andorra": "CET-1CEST,M3.5.0,M10.5.0/3",
+  "Europe/Astrakhan": "<+04>-4", "Europe/Athens": "EET-2EEST,M3.5.0/3,M10.5.0/4",
+  "Europe/Belgrade": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Berlin": "CET-1CEST,M3.5.0,M10.5.0/3",
+  "Europe/Bratislava": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Brussels": "CET-1CEST,M3.5.0,M10.5.0/3",
+  "Europe/Bucharest": "EET-2EEST,M3.5.0/3,M10.5.0/4", "Europe/Budapest": "CET-1CEST,M3.5.0,M10.5.0/3",
+  "Europe/Busingen": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Chisinau": "EET-2EEST,M3.5.0/3,M10.5.0/4",
+  "Europe/Copenhagen": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Dublin": "GMT0IST,M3.5.0/1,M10.5.0",
+  "Europe/Gibraltar": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Guernsey": "GMT0BST,M3.5.0/1,M10.5.0",
+  "Europe/Helsinki": "EET-2EEST,M3.5.0/3,M10.5.0/4", "Europe/Isle_of_Man": "GMT0BST,M3.5.0/1,M10.5.0",
+  "Europe/Istanbul": "<+03>-3", "Europe/Jersey": "GMT0BST,M3.5.0/1,M10.5.0", "Europe/Kaliningrad": "EET-2",
+  "Europe/Kirov": "MSK-3", "Europe/Kyiv": "EET-2EEST,M3.5.0/3,M10.5.0/4",
+  "Europe/Lisbon": "WET0WEST,M3.5.0/1,M10.5.0", "Europe/Ljubljana": "CET-1CEST,M3.5.0,M10.5.0/3",
+  "Europe/London": "GMT0BST,M3.5.0/1,M10.5.0", "Europe/Luxembourg": "CET-1CEST,M3.5.0,M10.5.0/3",
+  "Europe/Madrid": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Malta": "CET-1CEST,M3.5.0,M10.5.0/3",
+  "Europe/Mariehamn": "EET-2EEST,M3.5.0/3,M10.5.0/4", "Europe/Minsk": "<+03>-3",
+  "Europe/Monaco": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Moscow": "MSK-3",
   "Europe/Oslo": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Paris": "CET-1CEST,M3.5.0,M10.5.0/3",
   "Europe/Podgorica": "CET-1CEST,M3.5.0,M10.5.0/3", "Europe/Prague": "CET-1CEST,M3.5.0,M10.5.0/3",
   "Europe/Riga": "EET-2EEST,M3.5.0/3,M10.5.0/4", "Europe/Rome": "CET-1CEST,M3.5.0,M10.5.0/3",
@@ -170,8 +171,12 @@ const RAW = {
 
 export const TZ = Object.freeze(RAW);
 
-export function posixFor(iana) {
-  return typeof iana === 'string' && Object.hasOwn(TZ, iana) ? TZ[iana] : null;
+// The saved zone ({iana, posix} from the device) keeps its own rule, so
+// re-selecting it never loses the rule even when the table lacks the name.
+export function posixFor(iana, saved) {
+  if (typeof iana !== 'string') return null;
+  if (Object.hasOwn(TZ, iana)) return TZ[iana];
+  return saved && saved.iana === iana && saved.posix ? saved.posix : null;
 }
 
 export function zoneNames() {
