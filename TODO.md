@@ -22,6 +22,13 @@ monitors. Port names are examples.
 - 2026-11-23, same board: the boot log shows `wifi: reconnecting` with
   credentials left in NVS by earlier firmware. Whether it joins a network is
   not yet observed.
+- 2026-11-24, same board, build `e6c1e60`, observed by Claude over serial and
+  HTTP: the stale NVS credentials kept it at `wifi: reconnecting`. Improv
+  provisioning from `scripts/dev/provision_wifi.py` (credentials from
+  `secrets.yaml`) gave `wifi: connected, ip 192.168.1.170` and
+  `improv: connected, credentials saved`. NTP synced (`timeSynced: true`) and
+  the HN source fetched over HTTPS. Opening the port resets the board
+  (`rst:0x1 POWERON`); the script now waits for the boot Improv frame first.
 
 ## Pending
 
@@ -31,7 +38,9 @@ monitors. Port names are examples.
 - [ ] Button click and hold are detected reliably (GPIO0).
 - [ ] WiFi provisioning over Improv from the installer page.
 - [ ] Each dashboard page renders legibly at desk distance.
-- [ ] The web app is reachable at the device's IP and at `desk-gadget.local`.
+- [x] The web app is reachable at the device's IP and at `desk-gadget.local`
+      (2026-11-24, build `e6c1e60`, Claude: `GET /` 200 by IP, `/api/state`
+      by mDNS name).
 - [ ] An edit saved in the web app appears on the panel.
 - [ ] WiFi loss shows stale data and recovers without a restart.
 - [ ] One hour of running with no decline in free heap.

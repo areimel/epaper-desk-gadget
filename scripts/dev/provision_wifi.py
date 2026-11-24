@@ -51,14 +51,30 @@ def strings(data):
     return out
 
 
+def wait_for_boot(link, limit=8):
+    """Wait for the Improv state frame the firmware sends at boot, or `limit` seconds.
+
+    Opening the port asserts DTR/RTS on Linux, which resets the board through the CP2102, so a
+    frame written straight away lands in the ROM bootloader and is lost. A device that did not
+    reset sends no boot frame; then this simply waits out the limit.
+    """
+    seen, deadline = bytearray(), time.time() + limit
+    while time.time() < deadline:
+        seen += link.read(256)
+        if any(kind == STATE for kind, _ in frames(bytes(seen))):
+            time.sleep(0.5)  # let setup() finish before the RPC arrives
+            break
+    link.reset_input_buffer()
+
+
 def main(port):
     secrets = yaml.safe_load((Path(__file__).resolve().parents[2] / "secrets.yaml").read_text()) or {}
     ssid, password = secrets.get("wifi_ssid"), secrets.get("wifi_password", "")
     if not ssid:
         sys.exit("secrets.yaml has no wifi_ssid")
     with serial.Serial(port, 115200, timeout=0.2) as link:
-        link.dtr = link.rts = False  # do not reset the device
-        link.reset_input_buffer()
+        link.dtr = link.rts = False  # release reset; on Linux opening the port has already pulsed it
+        wait_for_boot(link)
         link.write(wifi_rpc(ssid, password))
         seen, deadline = bytearray(), time.time() + 25
         while time.time() < deadline:
