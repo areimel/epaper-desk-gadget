@@ -10,30 +10,57 @@ namespace {
 constexpr uint32_t TIMEOUT_MS = 10000;     // connect, TLS handshake and each read, separately
 constexpr size_t TLS_HEAP_NEEDED = 40000;  // largest free block wanted before a handshake
 
-// A Stream that keeps at most cap - 1 bytes. A longer body makes write() come up short, which
-// makes HTTPClient::writeToStream stop with HTTPC_ERROR_STREAM_WRITE; `overflow` tells why.
-class BoundedSink : public Stream {
+// HTTPClient::writeToStream needs a Stream; these only ever receive. A short write makes it stop
+// with HTTPC_ERROR_STREAM_WRITE, and `stopped` tells why.
+class WriteOnly : public Stream {
+ public:
+  size_t write(uint8_t b) override { return write(&b, 1); }
+  size_t write(const uint8_t* data, size_t n) override = 0;
+  int available() override { return 0; }
+  int read() override { return -1; }
+  int peek() override { return -1; }
+  size_t length() const { return len_; }
+  bool stopped = false;
+
+ protected:
+  size_t len_ = 0;
+};
+
+// Keeps at most cap - 1 bytes.
+class BoundedSink : public WriteOnly {
  public:
   BoundedSink(char* buf, size_t cap) : buf_(buf), cap_(cap) {}
-  size_t write(uint8_t b) override { return write(&b, 1); }
+  using WriteOnly::write;
   size_t write(const uint8_t* data, size_t n) override {
     const size_t room = cap_ - 1 - len_;
     const size_t take = n < room ? n : room;
     memcpy(buf_ + len_, data, take);
     len_ += take;
-    if (take < n) overflow = true;
+    if (take < n) stopped = true;
     return take;
   }
-  int available() override { return 0; }
-  int read() override { return -1; }
-  int peek() override { return -1; }
-  size_t length() const { return len_; }
-  bool overflow = false;
 
  private:
   char* buf_;
   size_t cap_;
-  size_t len_ = 0;
+};
+
+// Passes everything on to a ByteSink.
+class ForwardSink : public WriteOnly {
+ public:
+  explicit ForwardSink(ByteSink& sink) : sink_(sink) {}
+  using WriteOnly::write;
+  size_t write(const uint8_t* data, size_t n) override {
+    if (stopped || !sink_.write(data, n)) {
+      stopped = true;
+      return 0;
+    }
+    len_ += n;
+    return n;
+  }
+
+ private:
+  ByteSink& sink_;
 };
 
 void fail(net::GetResult& r, const char* reason) { snprintf(r.error, sizeof r.error, "%s", reason); }
@@ -52,16 +79,10 @@ void failCode(net::GetResult& r, int code, NetworkClientSecure& client) {
     default: snprintf(r.error, sizeof r.error, "HTTP error %d", code);
   }
 }
-}  // namespace
 
-namespace net {
-
-GetResult httpsGet(const char* url, char* buf, size_t cap) {
-  GetResult r{};
-  if (!buf || cap < 2) {
-    fail(r, "no memory");
-    return r;
-  }
+// One GET into `out`. cap > 0: refuse a declared length of cap or more before downloading.
+net::GetResult request(const char* url, WriteOnly& out, size_t cap, const char* stopReason, bool redirects) {
+  net::GetResult r{};
   if (ESP.getMaxAllocHeap() < TLS_HEAP_NEEDED) {
     fail(r, "no memory");
     return r;
@@ -75,6 +96,7 @@ GetResult httpsGet(const char* url, char* buf, size_t cap) {
   http.setTimeout(TIMEOUT_MS);
   http.setReuse(false);  // Connection: close; one request per session
   http.setUserAgent("desk-gadget");
+  if (redirects) http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
   if (!http.begin(client, url)) {
     fail(r, "bad URL");
     return r;
@@ -84,22 +106,38 @@ GetResult httpsGet(const char* url, char* buf, size_t cap) {
     failCode(r, r.httpCode, client);
   } else if (r.httpCode != HTTP_CODE_OK) {
     snprintf(r.error, sizeof r.error, "HTTP %d", r.httpCode);
-  } else if (http.getSize() >= static_cast<int>(cap)) {
-    fail(r, "too large");  // Content-Length says so; do not download it
+  } else if (cap && http.getSize() >= static_cast<int>(cap)) {
+    fail(r, stopReason);  // Content-Length says so; do not download it
   } else {
     // writeToStream de-chunks Transfer-Encoding: chunked and checks the length it read.
-    BoundedSink sink(buf, cap);
-    const int got = http.writeToStream(&sink);
-    if (sink.overflow) fail(r, "too large");
+    const int got = http.writeToStream(&out);
+    if (out.stopped) fail(r, stopReason);
     else if (got < 0) failCode(r, got, client);
-    else {
-      r.ok = true;
-      r.len = sink.length();
-      buf[r.len] = 0;
-    }
+    else r.ok = true;
+    r.len = out.length();
   }
   http.end();
   return r;
+}
+}  // namespace
+
+namespace net {
+
+GetResult httpsGet(const char* url, char* buf, size_t cap) {
+  if (!buf || cap < 2) {
+    GetResult r{};
+    fail(r, "no memory");
+    return r;
+  }
+  BoundedSink sink(buf, cap);
+  GetResult r = request(url, sink, cap, "too large", false);
+  if (r.ok) buf[r.len] = 0;
+  return r;
+}
+
+GetResult httpsGetTo(const char* url, ByteSink& sink) {
+  ForwardSink forward(sink);
+  return request(url, forward, 0, "bad data", true);
 }
 
 }  // namespace net

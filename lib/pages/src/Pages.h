@@ -18,7 +18,8 @@ struct PageContext {
   uint8_t visit;    // how many times this page has been shown before (steps HN stories, messages)
 };
 
-enum class SetupState : uint8_t { NoWifi, Connecting, NoPages };
+// Ready is not an error: it tells the owner where the web app is.
+enum class SetupState : uint8_t { NoWifi, Connecting, NoPages, Ready };
 
 namespace pages {
 // Clears the canvas, then draws the page.
