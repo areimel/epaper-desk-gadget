@@ -49,6 +49,8 @@ namespace panel {
 void begin() {
   board::setPeripheralPower(true);
   delay(100);  // let the panel rail settle before talking to the controller
+  // The driver writes these pins before it sets their mode, which the core logs as an error.
+  for (int pin : {BOARD_EPD_CS, BOARD_EPD_DC, BOARD_EPD_RST}) pinMode(pin, OUTPUT);
   spi.begin(BOARD_EPD_SCK, -1, BOARD_EPD_MOSI, BOARD_EPD_CS);
   epd.init(0, true, 20, false);  // no serial diagnostics; first refresh is a full one
 }

@@ -18,6 +18,7 @@
 
 namespace {
 constexpr uint32_t ADDRESS_SHOW_MS = 30000;        // how long the "edit me at" screen stays up
+constexpr uint32_t JOIN_PATIENCE_MS = 45000;      // after this, suggest setting WiFi up again
 constexpr uint32_t FULL_REFRESH_MS = 3600 * 1000;  // a still page is redrawn fully this often
 
 FeedConfig config;  // about 8 KB each: static, never on the stack
@@ -32,6 +33,7 @@ bool everConnected = false;
 bool redraw = true;        // something that may change the pixels happened
 bool wantFull = true;      // the next refresh must be a full one
 bool addressShown = false;  // the address screen is up
+bool joinHintShown = false;
 uint32_t addressUntil = 0;
 uint32_t lastFullAt = 0;
 int shownMinute = -1;
@@ -70,7 +72,11 @@ bool compose(Canvas& into, uint32_t now) {
   if (wifi == WifiState::NoCredentials) {
     pages::renderSetup(SetupState::NoWifi, "Plug me into a computer and open the installer page to set up WiFi.", into);
   } else if (!everConnected) {
-    pages::renderSetup(SetupState::Connecting, "This can take a few seconds.", into);
+    const bool slow = now >= JOIN_PATIENCE_MS;  // since boot: stored credentials may be out of date
+    pages::renderSetup(SetupState::Connecting,
+                       slow ? "Still trying. If your WiFi changed, set it up again from the installer page."
+                            : "This can take a few seconds.",
+                       into);
   } else if (static_cast<int32_t>(addressUntil - now) > 0 && net::deviceUrl()[0]) {
     char detail[96];
     snprintf(detail, sizeof detail, "%s or http://%s.local/", net::deviceUrl(), AppConfig::WIFI_HOSTNAME);
@@ -142,6 +148,7 @@ void update(uint32_t now) {
   if (net::copyWeather(weather) | net::copyHn(hn) | net::copyCalendar(cal)) redraw = wantFull = true;
   if (rotation.tick(now)) redraw = wantFull = true;
   if (addressShown && static_cast<int32_t>(addressUntil - now) <= 0) redraw = wantFull = true;
+  if (!everConnected && !joinHintShown && now >= JOIN_PATIENCE_MS) joinHintShown = redraw = true;
 
   struct tm local;
   const time_t t = time(nullptr);
