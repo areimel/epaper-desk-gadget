@@ -19,10 +19,10 @@ uint64_t hashUid(const char* s) {
 }
 
 // The TZID class of a date-time property. A TZID too long to copy is certainly not the
-// device's zone (TZ_MAX), so it is foreign.
+// device's zone (TZ_MAX), so it is foreign; so is an empty TZID= (present, but names no zone).
 Zone zoneOf(const Prop& p, const Day& day) {
   char tz[limits::TZ_MAX + 1];
-  if (param(p, "TZID", tz, sizeof tz)) return classifyZone(tz, day.tz);
+  if (param(p, "TZID", tz, sizeof tz)) return tz[0] ? classifyZone(tz, day.tz) : Zone::Foreign;
   return hasParam(p, "TZID") ? Zone::Foreign : Zone::Local;
 }
 

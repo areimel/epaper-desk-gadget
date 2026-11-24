@@ -22,9 +22,15 @@ int16_t minutesOf(int64_t inst) {
 }  // namespace
 
 void Event::evaluate(const Day& day, Collector& out) const {
-  if (start_.kind == Kind::None || start_.kind == Kind::Bad) return;  // cannot be placed or dated
   bool override = rid_.kind != Kind::None;
-  if (override) recordOverride(day, out);  // even when cancelled: it still replaces the original
+  // Recorded first, even when cancelled or undatable: the original instance is still replaced.
+  if (override) recordOverride(day, out);
+  if (start_.kind == Kind::None || start_.kind == Kind::Bad) {
+    // An override whose new time is unreadable replaced an instance near today: count it. Any
+    // other undatable event cannot be judged and is not counted.
+    if (override && !cancelled_ && (rid_.kind == Kind::Bad || day.near(rid_.day))) out.skip();
+    return;
+  }
   if (cancelled_) return;
   bool isSeries = !override && (hasRule_ || extraRule_);  // an override is a single instance
   bool foreign = start_.kind == Kind::Foreign || (hasEnd_ && end_.kind == Kind::Foreign);
@@ -53,23 +59,34 @@ void Event::recordOverride(const Day& day, Collector& out) const {
 // Whether an event that cannot be interpreted might have been on today (then it is counted).
 bool Event::plausible(const Day& day, bool isSeries) const {
   const int32_t today = day.today;
+  const int64_t span = spanCivilDays();
   if (isSeries && hasRule_) {
-    bool ended = rule_.until.kind != Kind::None && rule_.until.day < today - 1;
+    // Ended once the last start UNTIL allows, plus one occurrence's span, is before today.
+    bool ended = rule_.until.kind != Kind::None && rule_.until.day + span < today - 1;
     return rdateNear_ || (!ended && start_.day <= today + 1);
   }
   if (rdateNear_) return true;
   // A single event (or RDATE/EXRULE without RRULE): within a day of today, by civil dates.
+  return start_.day <= today + 1 && start_.day + span >= today - 1;
+}
+
+// Civil days from DTSTART's date to the end's date (0 for a same-day or unknown end).
+int64_t Event::spanCivilDays() const {
   int64_t endDay = start_.day;
   if (hasEnd_ && end_.kind != Kind::Bad) endDay = end_.day;
   else if (hasDur_ && !bad_) endDay = start_.day + dur_.days + dur_.secs / SECS_PER_DAY;
-  return start_.day <= today + 1 && endDay >= today - 1;
+  return endDay > start_.day ? endDay - start_.day : 0;
 }
 
 // Days covered by an all-day event: DTEND (exclusive) or DURATION, at least one.
 int32_t Event::allDayLength() const {
   int64_t len = 1;
-  if (hasEnd_ && end_.kind == Kind::Date) len = static_cast<int64_t>(end_.day) - start_.day;
-  else if (hasDur_) len = dur_.days + (dur_.secs + SECS_PER_DAY - 1) / SECS_PER_DAY;
+  if (hasEnd_ && end_.kind == Kind::Date) {
+    len = static_cast<int64_t>(end_.day) - start_.day;
+  } else if (hasEnd_ && (end_.kind == Kind::Local || end_.kind == Kind::Utc)) {
+    // A DATE-TIME end: up to its date, plus that date if the end is after its midnight.
+    len = static_cast<int64_t>(end_.day) - start_.day + (end_.secs > 0 ? 1 : 0);
+  } else if (hasDur_) len = dur_.days + (dur_.secs + SECS_PER_DAY - 1) / SECS_PER_DAY;
   if (len < 1) len = 1;
   return len > DURATION_DAYS_MAX ? DURATION_DAYS_MAX : static_cast<int32_t>(len);
 }
@@ -136,36 +153,61 @@ void Event::single(const Day& day, Collector& out) const {
   emit(day, out, s, endOf(s), Key{start_.day, s}, false);
 }
 
+// A series whose occurrences last longer than SPAN_MAX_DAYS is outside the EXDATE / override
+// window, so it is never shown; it is counted only when an occurrence could cover today (by
+// civil days, walking at most SPAN_WALK_MAX_DAYS start days; beyond that, counted always).
+void Event::longSeries(const Day& day, Collector& out, int64_t spanDays) const {
+  const int32_t today = day.today;
+  if (spanDays > SPAN_WALK_MAX_DAYS) {
+    out.skip();
+    return;
+  }
+  int32_t lo = today - static_cast<int32_t>(spanDays) - 1;
+  if (lo < start_.day) lo = start_.day;
+  const bool allDay = start_.kind == Kind::Date;
+  for (int32_t d = lo; d <= today + 1; d++) {
+    if (!occursOn(rule_, start_.day, d)) continue;
+    if (rule_.until.kind != Kind::None && d > rule_.until.day + 1) continue;  // +1: UTC skew
+    bool covers = allDay ? (d <= today && today < d + spanDays) : (d + spanDays >= today);
+    if (covers) {
+      out.skip();
+      return;
+    }
+  }
+}
+
 // A supported RRULE. Candidate start days are the few whose occurrence could reach today:
 // [today - span - 1, today + 1] for timed series (the extra day absorbs UTC offsets), and
 // [today - len + 1, today] for all-day ones. Each is tested in O(1) by occursOn().
 void Event::series(const Day& day, Collector& out) const {
   const int32_t today = day.today;
   const Rule& r = rule_;
-  if (r.until.kind != Kind::None && r.until.day < today - 1) return;  // ended
-  if (start_.day > today + 1) return;                                 // not begun
+  if (start_.day > today + 1) return;  // not begun
   const bool allDay = start_.kind == Kind::Date;
-  int32_t len = 1, lo, hi;
+  int32_t len = 1;
   int64_t offset = 0;  // DTEND - DTSTART, exact, applied to every occurrence
-  int64_t spanDays;
+  int64_t spanDays;    // civil days an occurrence can touch
   if (allDay) {
     len = allDayLength();
     spanDays = len;
-    lo = today - len + 1;
-    hi = today;
   } else {
     int64_t s0 = instantOf(start_);
     offset = endOf(s0) - s0;
     spanDays = offset / SECS_PER_DAY + 1;
-    lo = today - static_cast<int32_t>(spanDays > SPAN_MAX_DAYS ? 0 : spanDays) - 1;
-    hi = today + 1;
   }
-  if (spanDays > SPAN_MAX_DAYS) {  // occurrences longer than a week: outside the EXDATE window
-    out.skip();
+  // Ended: even the last start UNTIL allows, plus one occurrence's span, is before today.
+  if (r.until.kind != Kind::None && r.until.day + spanDays < today - 1) return;
+  if (spanDays > SPAN_MAX_DAYS) {
+    longSeries(day, out, spanDays);
     return;
   }
+  int32_t lo = allDay ? today - len + 1 : today - static_cast<int32_t>(spanDays) - 1;
+  const int32_t hi = allDay ? today : today + 1;
   if (lo < start_.day) lo = start_.day;
-  const bool untilTimed = r.until.kind == Kind::Local || r.until.kind == Kind::Utc;
+  // A timed UNTIL two or more civil days after the last candidate is after every candidate
+  // start, so it is only converted (mktime) when it could matter.
+  const bool untilTimed =
+      (r.until.kind == Kind::Local || r.until.kind == Kind::Utc) && r.until.day <= hi + 2;
   const int64_t untilInst = untilTimed ? instantOf(r.until) : NO_INSTANT;
   for (int32_t d = lo; d <= hi; d++) {
     if (!occursOn(r, start_.day, d)) continue;

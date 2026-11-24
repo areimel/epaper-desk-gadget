@@ -8,7 +8,9 @@
 //   rejoined). A logical line longer than ics::LINE_CAP keeps its first LINE_CAP bytes and is
 //   flagged truncated; the rest is dropped without buffering, so sync is never lost.
 // Lines -> component state machine (this class): BEGIN:VCALENDAR arms the parser; BEGIN:VEVENT
-//   opens an event (a second BEGIN:VEVENT discards an unterminated one); any BEGIN inside an event
+//   opens an event (a second BEGIN:VEVENT, END:VCALENDAR or end of input drops an unterminated
+//   one, counted in `skipped` if what was read places it on today, and if it was an override its
+//   series is uncertain today); any BEGIN inside an event
 //   (VALARM...) bumps a nesting counter and properties are only read at nesting 0; VTIMEZONE,
 //   VTODO, VJOURNAL, VFREEBUSY are never opened as events. END:VEVENT at nesting 0 evaluates.
 // Event properties -> ics::Event (IcsEvent): UID is kept as a 64-bit FNV-1a hash, SUMMARY is
@@ -31,7 +33,10 @@
 //   EXDATE      EXDATE_MAX=12 per event within [today-9, today+2]; overflow, a truncated EXDATE
 //               line or a foreign-zone EXDATE makes today's occurrence of that event uncertain:
 //               it is dropped and counted.
-//   series span a recurring event longer than SPAN_MAX_DAYS=7 is unsupported (skipped, counted).
+//   series span a recurring event longer than SPAN_MAX_DAYS=7 is never shown; it is counted on
+//               days an occurrence covers (start days walked up to 400; longer: always counted).
+//   undated     a VEVENT without a readable DTSTART cannot be placed or judged: not counted,
+//               unless it is an override of an instance near today (then counted).
 //
 // Day-window arithmetic
 //   today = civil day number of `now` in the process zone; todayStart/todayEnd = mktime of local
@@ -63,6 +68,7 @@ class IcsParser : public ByteSink {
  private:
   void onLine(char* line, size_t len, bool truncated);
   void beginEvent();
+  void dropEvent();
 
   ics::Day day_;
   ics::LineReader reader_;

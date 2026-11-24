@@ -31,7 +31,18 @@ bool IcsParser::write(const uint8_t* data, size_t n) {
   return true;
 }
 
+void IcsParser::dropEvent() {
+  // Broken structure cut this event off: it is not shown (lines such as STATUS or EXDATE may be
+  // missing), but it is counted if what was read places it on today.
+  if (!inEvent_) return;
+  collector_.beginProbe();
+  event_.evaluate(day_, collector_);
+  if (collector_.endProbe()) collector_.skip();
+  inEvent_ = false;
+}
+
 void IcsParser::beginEvent() {
+  dropEvent();
   event_.reset();
   inEvent_ = true;
   nest_ = 0;
@@ -65,7 +76,7 @@ void IcsParser::onLine(char* line, size_t len, bool truncated) {
       event_.evaluate(day_, collector_);
       inEvent_ = false;
     } else if (ics::equalsUpper(p.value, "VCALENDAR")) {
-      inEvent_ = false;  // truncated event: dropped
+      dropEvent();
     } else if (nest_ > 0) {
       nest_--;
     }
@@ -80,7 +91,7 @@ bool IcsParser::finish(CalSnap& snap) {
       onLine(reader_.text(), reader_.length(), reader_.truncated());
       reader_.clear();
     }
-    inEvent_ = false;  // an event without END:VEVENT is incomplete: dropped
+    dropEvent();  // an event without END:VEVENT is incomplete
     finished_ = true;
   }
   collector_.finish(snap);

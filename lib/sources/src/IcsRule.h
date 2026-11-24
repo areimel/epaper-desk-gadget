@@ -4,8 +4,8 @@
 #include "IcsTime.h"
 
 // RRULE subset: FREQ=DAILY|WEEKLY|YEARLY with INTERVAL, COUNT, UNTIL, WKST, plain BYDAY (WEEKLY
-// only) and, for YEARLY, a single BYMONTH / BYMONTHDAY that repeats DTSTART's. Everything else is
-// Freq::Unsupported. Occurrence tests are O(1) per day (YEARLY Feb 29 COUNT: O(years/interval)).
+// only) and, for YEARLY, a single BYMONTH (optionally with BYMONTHDAY) repeating DTSTART's.
+// Everything else, including YEARLY;BYMONTHDAY without BYMONTH, is Freq::Unsupported. Occurrence tests are O(1) per day (YEARLY Feb 29 COUNT: O(years/interval)).
 namespace ics {
 
 enum class Freq : uint8_t { None, Daily, Weekly, Yearly, Unsupported };

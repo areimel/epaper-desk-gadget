@@ -36,6 +36,11 @@ class Collector {
   // every occurrence of that series today is uncertain.
   void suppress(uint64_t uid, const Key& original, bool wildcard);
   void skip();
+  // Probe mode, for an event cut off by broken structure: add() and skip() only record that
+  // something would have been shown or counted; suppress() still applies, as a wildcard.
+  void beginProbe();
+  bool endProbe();  // true if the probed event would have touched today
+  // Idempotent: a second call produces the same snapshot.
   void finish(CalSnap& snap);
 
  private:
@@ -44,7 +49,7 @@ class Collector {
     Key key;
     bool wildcard;
   };
-  void count(uint16_t n);
+  static void addTo(uint16_t& total, uint16_t n);
 
   Candidate cand_[CAND_MAX];
   Suppression sup_[SUPPRESS_MAX];
@@ -53,6 +58,9 @@ class Collector {
   bool supOverflow_ = false;
   uint16_t evicted_ = 0;
   uint16_t skipped_ = 0;
+  uint16_t dropped_ = 0;  // series occurrences removed as uncertain by finish()
+  bool probe_ = false;
+  bool probeHit_ = false;
 };
 
 }  // namespace ics

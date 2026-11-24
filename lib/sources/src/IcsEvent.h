@@ -13,6 +13,7 @@ namespace ics {
 
 constexpr uint8_t EXDATE_MAX = 12;      // EXDATE values kept per event (only those near today)
 constexpr int32_t SPAN_MAX_DAYS = 7;    // longest occurrence of a series that is evaluated
+constexpr int32_t SPAN_WALK_MAX_DAYS = 400;  // longer: counted as skipped without checking
 constexpr int32_t NEAR_BEFORE = SPAN_MAX_DAYS + 2;  // EXDATE / RECURRENCE-ID kept from today-9
 constexpr int32_t NEAR_AFTER = 2;                   // ... to today+2 (covers UTC offsets)
 
@@ -42,6 +43,8 @@ class Event {
   // IcsEval.cpp
   void recordOverride(const Day& day, Collector& out) const;
   bool plausible(const Day& day, bool series) const;
+  int64_t spanCivilDays() const;
+  void longSeries(const Day& day, Collector& out, int64_t spanDays) const;
   int32_t allDayLength() const;
   int64_t endOf(int64_t start) const;
   bool excluded(const Key& k) const;

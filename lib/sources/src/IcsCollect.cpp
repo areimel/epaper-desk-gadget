@@ -23,14 +23,31 @@ bool keysMatch(const Key& a, const Key& b) {
   return a.day == b.day;
 }
 
-void Collector::count(uint16_t n) {
-  uint32_t sum = static_cast<uint32_t>(skipped_) + n;
-  skipped_ = static_cast<uint16_t>(sum > 0xFFFF ? 0xFFFF : sum);
+void Collector::addTo(uint16_t& total, uint16_t n) {
+  uint32_t sum = static_cast<uint32_t>(total) + n;
+  total = static_cast<uint16_t>(sum > 0xFFFF ? 0xFFFF : sum);
 }
 
-void Collector::skip() { count(1); }
+void Collector::skip() {
+  if (probe_) probeHit_ = true;
+  else addTo(skipped_, 1);
+}
+
+void Collector::beginProbe() {
+  probe_ = true;
+  probeHit_ = false;
+}
+
+bool Collector::endProbe() {
+  probe_ = false;
+  return probeHit_;
+}
 
 void Collector::add(const Candidate& c) {
+  if (probe_) {
+    probeHit_ = true;
+    return;
+  }
   if (candCount_ < CAND_MAX) {
     cand_[candCount_++] = c;
     return;
@@ -50,7 +67,8 @@ void Collector::suppress(uint64_t uid, const Key& original, bool wildcard) {
     supOverflow_ = true;
     return;
   }
-  sup_[supCount_++] = Suppression{uid, original, wildcard};
+  // An incomplete override may have been cancelled or moved: treat its series as uncertain.
+  sup_[supCount_++] = Suppression{uid, original, wildcard || probe_};
 }
 
 void Collector::finish(CalSnap& snap) {
@@ -69,9 +87,10 @@ void Collector::finish(CalSnap& snap) {
         else drop = keysMatch(sup_[j].key, c.key);
       }
     }
-    if (uncertain) skip();
+    if (uncertain) addTo(dropped_, 1);
     if (!drop) cand_[kept++] = c;
   }
+  candCount_ = kept;  // removed for good, so a second finish() does not count them again
   // Insertion sort: at most CAND_MAX entries.
   for (uint8_t i = 1; i < kept; i++) {
     Candidate c = cand_[i];
@@ -91,12 +110,14 @@ void Collector::finish(CalSnap& snap) {
   }
   for (uint8_t i = n; i < limits::CAL_EVENTS_MAX; i++) memset(&snap.events[i], 0, sizeof snap.events[i]);
   snap.count = n;
+  uint16_t skipped = skipped_;
+  addTo(skipped, dropped_);
   // Evicted candidates could have filled free slots: report them rather than hide them.
   if (evicted_ > 0 && n < limits::CAL_EVENTS_MAX) {
     uint16_t gap = static_cast<uint16_t>(limits::CAL_EVENTS_MAX - n);
-    count(evicted_ < gap ? evicted_ : gap);
+    addTo(skipped, evicted_ < gap ? evicted_ : gap);
   }
-  snap.skipped = skipped_;
+  snap.skipped = skipped;
 }
 
 }  // namespace ics

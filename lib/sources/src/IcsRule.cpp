@@ -153,6 +153,8 @@ Rule parseRule(const char* value) {
   if (!ok || r.freq == Freq::None) r.freq = Freq::Unsupported;
   if (r.byday && r.freq != Freq::Weekly) r.freq = Freq::Unsupported;
   if ((r.bymonth || r.bymonthday) && r.freq != Freq::Yearly) r.freq = Freq::Unsupported;
+  // YEARLY;BYMONTHDAY without BYMONTH expands to every month (RFC 5545), not once a year.
+  if (r.freq == Freq::Yearly && r.bymonthday && !r.bymonth) r.freq = Freq::Unsupported;
   return r;
 }
 

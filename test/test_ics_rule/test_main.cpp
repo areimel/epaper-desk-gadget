@@ -46,6 +46,7 @@ void test_parse_unsupported() {
       "INTERVAL=2",                  "",                        "FREQ=WEEKLY;BYDAY=XX",
       "FREQ=DAILY;FREQ=WEEKLY",      "garbage\xff",             "FREQ=YEARLY;BYDAY=MO",
       // Numeric overflow guards: over-long or over-limit INTERVAL / COUNT are rejected.
+      "FREQ=YEARLY;BYMONTHDAY=23", "FREQ=YEARLY;BYMONTHDAY=23;COUNT=2",
       "FREQ=DAILY;INTERVAL=4294967297", "FREQ=DAILY;INTERVAL=10001", "FREQ=DAILY;COUNT=1000001",
       "FREQ=WEEKLY;COUNT=99999999999999999999", "FREQ=DAILY;INTERVAL=-1",
   };
