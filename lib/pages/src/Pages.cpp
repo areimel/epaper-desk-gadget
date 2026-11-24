@@ -21,6 +21,8 @@ bool usesClock(PageId page) { return page == PageId::Clock; }
 void render(PageId page, const PageContext& ctx, Canvas& canvas) {
   switch (page) {
     case PageId::Clock: renderClock(ctx, canvas); break;
+    case PageId::Weather: renderWeather(ctx, canvas); break;
+    case PageId::Hn: renderHn(ctx, canvas); break;
     case PageId::Messages: renderMessages(ctx, canvas); break;
     case PageId::Notes: renderNotes(ctx, canvas); break;
   }
