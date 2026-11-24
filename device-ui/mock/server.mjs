@@ -124,8 +124,9 @@ export function createMockServer({ slowMs = 0, fixturesDir = path.join(HERE, 'fi
     'POST /api/refresh'(req, res) {
       setTimeout(() => {
         const now = Math.floor(Date.now() / 1000);
-        for (const s of Object.values(state.sources)) {
-          if (s.state === 'stale') Object.assign(s, { state: 'ok', updated: now, error: '' });
+        for (const [id, s] of Object.entries(state.sources)) {
+          // The device refetches every source it has; the mock has them all succeed.
+          if (s.state !== 'never' || (id === 'calendar' && calendarUrl !== null)) Object.assign(s, { state: 'ok', updated: now, error: '' });
         }
         state.refreshCount += 1;
       }, 2000).unref();
