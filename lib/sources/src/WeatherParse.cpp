@@ -20,15 +20,15 @@ bool unreserved(char c) {
 }
 
 void percentEncode(const char* in, char* out) {
-  static const char HEX[] = "0123456789ABCDEF";
+  static const char HEX_DIGITS[] = "0123456789ABCDEF";
   for (; *in; in++) {
     unsigned char c = static_cast<unsigned char>(*in);
     if (unreserved(*in)) {
       *out++ = *in;
     } else {
       *out++ = '%';
-      *out++ = HEX[c >> 4];
-      *out++ = HEX[c & 15];
+      *out++ = HEX_DIGITS[c >> 4];
+      *out++ = HEX_DIGITS[c & 15];
     }
   }
   *out = 0;
