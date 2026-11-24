@@ -170,6 +170,22 @@ void test_empty_state_with_and_without_second_line() {
   TEST_ASSERT_TRUE(c.minX >= 0 && c.maxX <= 249);
 }
 
+void test_degree_ring_is_aligned_with_numerals() {
+  for (Font f : {Font::Num32, Font::NumBig}) {
+    canvas.clear();
+    draw::text(canvas, f, 10, 80, "1");
+    int w = draw::degree(canvas, f, 40, 80);
+    dump::Ink ring = dump::ink(canvas, 38, 0, 80, Canvas::H);
+    dump::Ink digit = dump::ink(canvas, 0, 0, 38, Canvas::H);
+    TEST_ASSERT_EQUAL(digit.minY, ring.minY);  // top of the ring = top of the digits
+    TEST_ASSERT_EQUAL(40, ring.minX);
+    TEST_ASSERT_EQUAL(40 + w - 1, ring.maxX);
+    TEST_ASSERT_TRUE(w >= 6 && w <= 10);
+    TEST_ASSERT_FALSE(canvas.pixel(40 + w / 2, ring.minY + w / 2));  // hollow
+    TEST_ASSERT_TRUE(canvas.pixel(40, ring.minY + w / 2) && canvas.pixel(41, ring.minY + w / 2));  // 2 px stroke
+  }
+}
+
 void test_hairline_is_one_pixel() {
   canvas.clear();
   draw::hairline(canvas, 10, 50, 100);
@@ -197,6 +213,7 @@ int main() {
   RUN_TEST(test_fitted_edge_cases);
   RUN_TEST(test_checkbox_done_differs_and_stays_in_11x11);
   RUN_TEST(test_empty_state_with_and_without_second_line);
+  RUN_TEST(test_degree_ring_is_aligned_with_numerals);
   RUN_TEST(test_hairline_is_one_pixel);
   return UNITY_END();
 }

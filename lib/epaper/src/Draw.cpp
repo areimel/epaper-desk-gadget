@@ -123,11 +123,20 @@ void checkbox(Canvas& canvas, int x, int y, bool done) {
   u8g2_DrawFrame(g, x, y, 11, 11);
   u8g2_DrawFrame(g, x + 1, y + 1, 9, 9);  // second ring makes the outline 2 px
   if (!done) return;
-  // A 2 px tick inside the 7x7 interior: short stroke down-right, long stroke up-right.
-  u8g2_DrawLine(g, x + 3, y + 5, x + 4, y + 7);
-  u8g2_DrawLine(g, x + 4, y + 5, x + 5, y + 7);
-  u8g2_DrawLine(g, x + 5, y + 7, x + 8, y + 3);
-  u8g2_DrawLine(g, x + 4, y + 7, x + 7, y + 3);
+  // A tick in the 7x7 interior: short stroke down-right, long stroke up-right, 2 px tall.
+  for (int dy = 0; dy < 2; dy++) {
+    u8g2_DrawLine(g, x + 2, y + 4 + dy, x + 4, y + 6 + dy);
+    u8g2_DrawLine(g, x + 4, y + 6 + dy, x + 8, y + 2 + dy);
+  }
+}
+
+int degree(Canvas& canvas, Font font, int x, int baselineY) {
+  int d = fonts::ascent(font) / 5;
+  if (d < 6) d = 6;
+  int top = baselineY - fonts::ascent(font);  // digits start this row
+  u8g2_DrawFrame(canvas.g(), x, top, d, d);
+  u8g2_DrawFrame(canvas.g(), x + 1, top + 1, d - 2, d - 2);
+  return d;
 }
 
 void emptyState(Canvas& canvas, const char* line1, const char* line2) {

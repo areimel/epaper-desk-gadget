@@ -35,6 +35,11 @@ Font fitted(Canvas& canvas, const Font* ladder, int n, Box box, const char* s);
 
 void checkbox(Canvas& canvas, int x, int y, bool done);  // 11x11, 2 px outline, tick when done
 
+// The Num fonts have no degree sign: draws a ring in the style of font (a Num font) with its
+// left edge at x, top aligned with the numerals, and returns its width. Advance x by that
+// plus a pixel or two before whatever follows (e.g. "C").
+int degree(Canvas& canvas, Font font, int x, int baselineY);
+
 // Two centred lines for a page with nothing to show, below the title bar: line1 in
 // Font::BodyBold, line2 (may be null) in Font::Small.
 void emptyState(Canvas& canvas, const char* line1, const char* line2);

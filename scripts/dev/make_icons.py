@@ -171,11 +171,16 @@ def build(name, c):
             add(drops(c, [(14, 36), (25, 39), (36, 36)], 5, 1.8))
     elif name == "Snow":
         add(cl)
-        for x, y in ((13, 36), (25, 40), (37, 36)):
-            add(flake(c, x, y, 5))
+        if c.n >= 48:
+            for x, y in ((13, 36), (25, 40), (37, 36)):
+                add(flake(c, x, y, 5))
+        else:  # flakes would clog at 12 units per pixel pair: round dots read better
+            for x, y in ((12, 37), (24, 42), (36, 37)):
+                add(circle(x, y, 3.9))
     elif name == "Thunder":
-        add(cl)
-        bolt = polygon([(32, 23), (16, 38), (24, 38), (19, 47.5), (39, 30), (30, 30), (36, 23)])
+        add(cloud(4, 0))
+        bolt = grow(polygon([(31, 22), (17, 37), (25, 37), (20, 47.5), (39, 28), (30, 28), (36, 22)]),
+                    0 if c.n >= 48 else 0.9)  # fatter bolt at 24 px
         cut(grow(bolt, 2))
         add(bolt)
     elif name == "Unknown":
