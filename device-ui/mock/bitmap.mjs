@@ -1,4 +1,11 @@
 // 1-bit 250x122 mock screens: MSB-left, set bit = black, 6 zero padding bits per row.
+// A page's screen is the device's own rendering (test/fixtures/golden/<page>.bin, written by the
+// native page tests) when that file exists, else the generated placeholder below.
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const GOLDEN_DIR = fileURLToPath(new URL('../../test/fixtures/golden/', import.meta.url));
 export const SCREEN = { w: 250, h: 122, rowBytes: 32, bytes: 3904 };
 
 let livePage = 'clock';
@@ -89,7 +96,20 @@ const PAGES = {
   },
 };
 
-export function screenFor(pageId = livePage) {
+function goldenFor(pageId, dir) {
+  if (!dir || !Object.hasOwn(PAGES, pageId)) return null;
+  try {
+    const b = readFileSync(path.join(dir, `${pageId}.bin`));
+    return b.length === SCREEN.bytes ? new Uint8Array(b) : null;
+  } catch {
+    return null;
+  }
+}
+
+// goldenDir null disables the rendered screens (the placeholder tests use that).
+export function screenFor(pageId = livePage, goldenDir = GOLDEN_DIR) {
+  const golden = goldenFor(pageId, goldenDir);
+  if (golden) return golden;
   const b = new Uint8Array(SCREEN.bytes);
   rect(b, 0, 0, SCREEN.w, 14);
   box(b, 0, 0, SCREEN.w, SCREEN.h);
