@@ -19,7 +19,7 @@ test("readIndex returns boards in file order", () => {
   assert.ok(index);
   assert.deepEqual(
     index.boards.map((b) => b.id),
-    ["sticks3", "esp32"],
+    ["wireless-paper", "fixture-esp32"],
   );
   assert.equal(index.project.name, "Fixture Starter");
 });
@@ -28,7 +28,7 @@ test("boardSummary describes board capabilities", () => {
   const index = readIndex(fixtures)!;
   assert.equal(
     boardSummary(index.boards[0]),
-    "ESP32-S3 · 2 buttons · display · battery",
+    "ESP32-S3 · 1 button · display",
   );
   assert.equal(boardSummary(index.boards[1]), "ESP32 · 1 button");
 });
@@ -143,7 +143,7 @@ test("check-firmware fails when a board manifest is missing", () => {
 
 test("check-firmware fails when a board manifest is not JSON", () => {
   const dir = packaged();
-  writeFileSync(join(dir, "sticks3/manifest.json"), "{nope");
+  writeFileSync(join(dir, "wireless-paper/manifest.json"), "{nope");
   const r = run(dir);
   assert.equal(r.status, 1);
   assert.match(r.stderr, /manifest/i);
