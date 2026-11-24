@@ -187,15 +187,19 @@ async function save() {
 }
 
 app.showPage = async (id) => {
-  notice(`Showing ${PAGE_NAMES[id]} on the gadget. The screen takes a few seconds to redraw.`);
+  const say = (text, bad = false) => {
+    const el = $('#show-status');
+    if (el) { el.textContent = text; el.classList.toggle('stale', bad); }
+  };
+  say('Showing it now. The gadget takes a few seconds to redraw.');
   try {
     await api.show(id);
     app.state = await api.state();
     app.live = await api.screen();
     renderHero();
-    notice(`${PAGE_NAMES[id]} is on the gadget now.`);
+    say(`${PAGE_NAMES[id]} is on the gadget now.`);
   } catch (e) {
-    notice(apiErrorFor(e.status, e.body).message, true);
+    say(apiErrorFor(e.status, e.body).message, true);
   }
 };
 
@@ -213,6 +217,7 @@ async function refreshData() {
 
 async function start() {
   $('#retry').hidden = true;
+  paintLive(); // size the empty screen now so the page doesn't jump later
   try {
     app.state = await api.state();
     if (app.state.screen) app.geom = app.state.screen;

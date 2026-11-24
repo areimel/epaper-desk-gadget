@@ -79,8 +79,8 @@ function item(app, page, index, count, avail) {
   },
   mini,
   h('div', { class: 'page-row' },
-    h('span', { class: 'order', 'aria-hidden': 'true' }, String(index + 1)),
-    h('label', { class: 'page-name', for: `on-${id}` }, toggle, h('span', {}, name)),
+    h('label', { class: 'page-name', for: `on-${id}` }, toggle,
+      h('span', {}, h('span', { class: 'order' }, `${index + 1} `), name)),
     h('span', { class: 'moves' },
       iconButton(`Move ${name} earlier`, '←', () => move(app, id, -1), { disabled: index === 0 }),
       iconButton(`Move ${name} later`, '→', () => move(app, id, 1), { disabled: index === count - 1 }))));

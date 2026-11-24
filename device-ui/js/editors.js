@@ -69,8 +69,10 @@ function weatherEditor(app) {
   }
   const { wrap } = field({ id: fieldId('weather.place'), label: f.weather ? 'Change the place' : 'Find your city', input });
   const form = h('form', { class: 'search', onsubmit: search }, wrap, h('button', { type: 'submit' }, 'Search'));
+  const pending = f.weather && f.weather.place !== app.saved.weather?.place;
   const current = f.weather
-    ? h('p', { class: 'current' }, 'Showing the weather for ', h('strong', {}, f.weather.place), '.')
+    ? h('p', { class: 'current' }, pending ? 'After you save, the gadget shows the weather for ' : 'Showing the weather for ',
+      h('strong', {}, f.weather.place), '.')
     : h('p', { class: 'empty' }, 'No place chosen yet. Search for your city to show its weather.');
   const units = f.weather ? h('fieldset', { class: 'units' }, h('legend', {}, 'Temperatures in'),
     ...[['c', 'Celsius'], ['f', 'Fahrenheit']].map(([v, label]) => h('label', {},
@@ -151,7 +153,8 @@ export function renderEditor(root, app) {
     h('div', { class: 'editor-body' },
       h('figure', { class: 'editor-preview' }, canvas,
         h('figcaption', { id: 'preview-note', 'data-clean': clean }, app.dirty ? DIRTY_NOTE : clean),
-        h('button', { type: 'button', onclick: () => app.showPage(id) }, 'Show on gadget')),
+        h('button', { type: 'button', onclick: () => app.showPage(id) }, 'Show on gadget'),
+        h('p', { id: 'show-status', class: 'hint', role: 'status' })),
       h('div', { class: 'editor-form' }, health(app, id), ...BUILDERS[id](app, local[id]))));
   applyErrors(root, app);
 }

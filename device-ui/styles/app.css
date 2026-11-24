@@ -38,7 +38,8 @@ main > section { min-width: 0; }
 .sources li.stale, .source.stale { color: var(--red-pencil); }
 .sources li.stale::before, .source.stale::before { background: var(--red-pencil); border-color: var(--red-pencil); }
 .notice { margin-top: var(--space-3); min-height: 1.5em; }
-.notice.stale, .warn { color: var(--red-pencil); }
+.notice.stale, .warn, #show-status.stale { color: var(--red-pencil); }
+#show-status { max-width: 250px; }
 
 /* ---- fields --------------------------------------------------------------- */
 .field { display: grid; gap: var(--space-1); }
@@ -47,8 +48,9 @@ main > section { min-width: 0; }
 .count { font-weight: 400; font-size: var(--size-s); color: var(--graphite); white-space: nowrap; }
 .count.over { color: var(--red-pencil); font-weight: 700; }
 .dwell { margin-bottom: var(--space-4); }
-.dwell .inline { display: flex; align-items: center; gap: var(--space-2); }
-.dwell input { width: 6rem; }
+.dwell .inline { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--size-l); }
+.dwell label { font-weight: 400; }
+.dwell input { width: 4.5rem; font-size: var(--size-l); text-align: center; padding-inline: var(--space-1); }
 #queue-help { margin-bottom: var(--space-4); max-width: 38rem; }
 
 /* ---- the queue of mini-screens ------------------------------------------ */
@@ -75,8 +77,8 @@ main > section { min-width: 0; }
 .page.off .screen { filter: contrast(0.35) brightness(1.15); }
 .page-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); padding-inline: 6px; }
 .moves { margin-left: auto; }
-.order { color: var(--graphite); font-size: var(--size-s); min-width: 1ch; }
-.page-name { display: flex; align-items: center; gap: var(--space-2); flex: 1 0 auto; cursor: pointer; font-weight: 700; }
+.order { color: var(--graphite); font-weight: 400; }
+.page-name { display: flex; align-items: center; gap: var(--space-2); flex: 1 1 8rem; min-width: 0; cursor: pointer; font-weight: 700; line-height: 1.25; }
 .page.off .page-name span { color: var(--graphite); font-weight: 400; }
 .moves { display: flex; gap: var(--space-1); }
 button.icon { min-height: 2.25rem; min-width: 2.25rem; padding: 0; border-width: 0; font-size: var(--size-l); line-height: 1; }
