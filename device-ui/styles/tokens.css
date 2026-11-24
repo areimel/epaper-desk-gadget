@@ -1,0 +1,35 @@
+/* Design tokens. Palette, type and sizes are fixed by the design spec. */
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  src: url("../fonts/atkinson-hyperlegible-next-latin.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --paper: #E3E5DC;       /* panel white */
+  --ink: #17191B;         /* panel black, all text */
+  --desk: #F6F7F3;        /* page background */
+  --highlighter: #F2D43D; /* selection and focus only */
+  --red-pencil: #C2402E;  /* errors and stale data */
+  --graphite: #6B7075;    /* secondary text */
+
+  --font: "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --size-s: 0.875rem;  /* 14 */
+  --size-m: 1rem;      /* 16 */
+  --size-l: 1.25rem;   /* 20 */
+  --size-xl: 1.75rem;  /* 28 */
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2.5rem;
+
+  --column: 44rem;
+  --gutter: 1rem;
+  --line: 2px;
+  --radius: 4px;
+}

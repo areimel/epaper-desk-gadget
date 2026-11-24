@@ -42,10 +42,16 @@ export function drawScreen(canvas, bytes, geom = GEOM) {
   ctx.putImageData(img, 0, 0);
 }
 
-// Size a canvas to an integer multiple of the panel so pixels stay square.
-export function fitCanvas(canvas, avail, geom = GEOM, max = 4) {
-  const s = bestScale(avail, geom.w, max);
-  canvas.style.width = `${geom.w * s}px`;
-  canvas.style.height = `${geom.h * s}px`;
-  return s;
+// Size a canvas to a whole number of DEVICE pixels per panel pixel, so every
+// panel pixel stays square and sharp on any screen density.
+// On a low-density screen narrower than the panel there is no whole scale, so
+// the canvas shrinks smoothly instead (class "shrunk") and returns 0.
+export function fitCanvas(canvas, availCss, geom = GEOM, maxCss = 3, dpr = 1) {
+  const shrink = availCss * dpr < geom.w;
+  const k = shrink ? 0 : bestScale(availCss * dpr, geom.w, Math.max(1, Math.floor(maxCss * dpr)));
+  const cssW = shrink ? Math.floor(availCss) : (geom.w * k) / dpr;
+  canvas.style.width = `${cssW}px`;
+  canvas.style.height = `${(cssW * geom.h) / geom.w}px`;
+  canvas.classList.toggle('shrunk', shrink);
+  return k;
 }
