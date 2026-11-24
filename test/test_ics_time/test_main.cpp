@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <unity.h>
 
@@ -130,8 +131,24 @@ void test_durations() {
   TEST_ASSERT_TRUE(ics::parseDuration("-PT15M", d));  // negative: clamped to zero
   TEST_ASSERT_EQUAL(0, d.days);
   TEST_ASSERT_EQUAL_INT64(0, d.secs);
-  const char* bad[] = {"", "P", "PT", "1H", "PT1X", "P1H", "PTH", "P1DT", "P99999999999D"};
+  const char* bad[] = {"", "P", "PT", "1H", "PT1X", "P1H", "PTH", "P1DT", "P99999999999D",
+                       "P1W1W",              // repeated unit
+                       "P9999999W9999999W",  // repeated unit that would overflow the total
+                       "PT1M1H",             // out of order
+                       "P1DT1H1H", "P1D1W", "PT1D", "P1S",
+                       "P200000W",            // 1.4 million days: over the limit
+                       "P999999DT9999999H"};  // each field fits, the total is too long
   for (const char* s : bad) TEST_ASSERT_FALSE_MESSAGE(ics::parseDuration(s, d), s);
+  // A hostile long string: thousands of repeated fields.
+  static char hostile[8192];
+  hostile[0] = 'P';
+  for (size_t i = 1; i + 9 < sizeof hostile; i += 8) memcpy(hostile + i, "9999999W", 8);
+  hostile[sizeof hostile - 1] = '\0';
+  TEST_ASSERT_FALSE(ics::parseDuration(hostile, d));
+  TEST_ASSERT_TRUE(ics::parseDuration("P1W2DT3H4M5S", d));  // ordered week + day is accepted
+  TEST_ASSERT_EQUAL(9, d.days);
+  TEST_ASSERT_TRUE(ics::parseDuration("P142857W", d));  // 999999 days: at the limit
+  TEST_ASSERT_EQUAL(999999, d.days);
 }
 
 void test_add_duration_follows_wall_clock() {

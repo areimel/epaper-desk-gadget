@@ -146,11 +146,15 @@ bool parseDuration(const char* s, Duration& d) {
   bool neg = false;
   if (*s == '+' || *s == '-') neg = *s++ == '-';
   if (*s++ != 'P') return false;
-  bool inTime = false, any = false, timeAny = false;
+  // Units must appear at most once and in order W, D, then after T: H, M, S. Each field has at
+  // most 7 digits, so with each unit once the totals fit easily; days are also capped.
+  static const char units[] = "WDHMS";
+  int lastRank = -1;
+  bool inTime = false, timeAny = false;
   int64_t days = 0, secs = 0;
   while (*s) {
     if (*s == 'T') {
-      if (inTime) return false;
+      if (inTime || lastRank > 1) return false;
       inTime = true;
       s++;
       continue;
@@ -158,21 +162,24 @@ bool parseDuration(const char* s, Duration& d) {
     int64_t n = 0;
     int nd = 0;
     while (*s >= '0' && *s <= '9') {
-      if (++nd > 7) return false;  // caps every field below 10^7: no overflow, no absurd spans
+      if (++nd > 7) return false;
       n = n * 10 + (*s++ - '0');
     }
-    if (nd == 0) return false;
-    char u = *s++;
-    if (!inTime && u == 'W') days += n * 7;
-    else if (!inTime && u == 'D') days += n;
-    else if (inTime && u == 'H') secs += n * 3600;
-    else if (inTime && u == 'M') secs += n * 60;
-    else if (inTime && u == 'S') secs += n;
-    else return false;
-    any = true;
+    if (nd == 0 || !*s) return false;
+    const char* u = strchr(units, *s++);
+    if (!u) return false;
+    int rank = static_cast<int>(u - units);
+    if (rank <= lastRank || (rank >= 2) != inTime) return false;  // repeated, out of order, or T
+    lastRank = rank;
+    if (rank == 0) days += n * 7;
+    else if (rank == 1) days += n;
+    else if (rank == 2) secs += n * 3600;
+    else if (rank == 3) secs += n * 60;
+    else secs += n;
     if (inTime) timeAny = true;
   }
-  if (!any || (inTime && !timeAny)) return false;
+  if (lastRank < 0 || (inTime && !timeAny)) return false;
+  if (days + secs / SECS_PER_DAY > DURATION_DAYS_MAX) return false;  // checked before the cast
   if (!neg) {
     d.days = static_cast<int32_t>(days);
     d.secs = secs;

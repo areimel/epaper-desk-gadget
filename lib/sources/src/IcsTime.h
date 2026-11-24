@@ -8,6 +8,7 @@ namespace ics {
 
 constexpr int64_t NO_INSTANT = INT64_MIN;
 constexpr int32_t SECS_PER_DAY = 86400;
+constexpr int32_t DURATION_DAYS_MAX = 1000000;  // longer DURATIONs are rejected as malformed
 
 // Proleptic Gregorian civil date <-> days since 1970-01-01 (H. Hinnant's algorithms).
 int32_t daysFromCivil(int y, int m, int d);
@@ -55,7 +56,8 @@ struct Duration {
   int32_t days = 0;
   int64_t secs = 0;
 };
-// False if malformed. A negative duration parses as zero (an event cannot end before it starts).
+// False if malformed (a unit repeated or out of order, a field over 7 digits, or longer than
+// DURATION_DAYS_MAX). A negative duration parses as zero (an event cannot end before it starts).
 bool parseDuration(const char* s, Duration& d);
 // start + d: wallClock adds days on the device wall clock, otherwise (UTC) as 86400 s each.
 int64_t addDuration(int64_t start, bool wallClock, const Duration& d);
