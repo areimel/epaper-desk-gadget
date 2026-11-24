@@ -20,6 +20,7 @@ export function apiErrorFor(status, body) {
 // "messages[3].text" -> "f-messages-3-text": the id of the matching input.
 export function fieldId(path) {
   if (!path) return '';
+  if (path === 'tz.posix') return 'f-tz-iana'; // the rule has no input; the select stands for it
   return 'f-' + path.replace(/\[(\d+)\]/g, '-$1').replace(/\./g, '-');
 }
 
@@ -37,10 +38,6 @@ const SOURCES = {
   hn: { name: 'Hacker News', older: 'older headlines', fix: 'It will try again on its own.' },
   calendar: { name: 'Calendar', older: "an older copy of today's events", fix: 'Check the calendar link.' },
 };
-
-export function sourceName(id) {
-  return SOURCES[id]?.name || id;
-}
 
 export function sourceLine(id, src, now) {
   const s = SOURCES[id] || { name: id, older: 'older data', fix: '' };
@@ -67,4 +64,17 @@ export function calendarSkippedLine(n) {
   if (!n) return '';
   const one = n === 1;
   return `${n} ${one ? 'event' : 'events'} today ${one ? 'is' : 'are'} left out because ${one ? 'it uses' : 'they use'} another time zone or a repeat rule the gadget can't follow.`;
+}
+
+// Paths the device may name that have no input on screen.
+const NO_INPUT = new Set(['messages', 'notes.lines', 'weather.lat', 'weather.lon']);
+export const hasInput = (path) => !!path && !NO_INPUT.has(path);
+
+// What the save bar says after a failed check: point at the fields, unless an
+// issue has no field to point at, in which case say what it is.
+export function fixMessage(issues, has) {
+  const orphan = issues.find((i) => !has(i.path));
+  if (orphan) return orphan.message;
+  const n = issues.length;
+  return `Fix ${n === 1 ? 'the highlighted field' : `the ${n} highlighted fields`} before saving.`;
 }

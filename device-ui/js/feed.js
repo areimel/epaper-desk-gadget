@@ -22,6 +22,13 @@ export const togglePage = (f, id, on) =>
   ({ ...clone(f), pages: f.pages.map((p) => (p.id === id ? { ...p, on } : { ...p })) });
 export const pageOn = (f, id) => !!f.pages.find((p) => p.id === id)?.on;
 
+// The rotation field holds minutes as text; anything else is an error to show.
+export function parseDwellMinutes(text) {
+  const t = String(text ?? '').trim();
+  const min = t === '' ? NaN : Number(t);
+  if (!Number.isFinite(min)) return { error: 'Enter a number of minutes, for example 5.' };
+  return { sec: Math.round(min * 60) };
+}
 export const setDwell = (f, sec) => ({ ...clone(f), dwellSec: Math.round(Number(sec)) });
 export const setTz = (f, iana, posix) => ({ ...clone(f), tz: { iana, posix } });
 export function setPlace(f, { place, lat, lon }) {
@@ -64,7 +71,10 @@ export function canAdd(f, limits, kind) {
 // The body for PUT /api/feed: calendar link only when the person changed it.
 export function toPutBody(f) {
   const body = clone(f);
-  body.calendar = typeof f.calendar?.url === 'string' ? { url: f.calendar.url } : {};
+  // The device checks the scheme case-sensitively.
+  const url = typeof f.calendar?.url === 'string'
+    ? f.calendar.url.replace(/^(https|webcal):\/\//i, (m) => m.toLowerCase()) : null;
+  body.calendar = url === null ? {} : { url };
   return body;
 }
 
@@ -103,6 +113,8 @@ export function checkFeed(f, limits) {
     } else tooLong(issues, 'calendar.url', url, L.urlMax, 'This link');
   }
   if (f.weather) tooLong(issues, 'weather.place', f.weather.place, L.placeMax, 'The place name');
-  tooLong(issues, 'tz.posix', f.tz?.posix, L.tzMax, 'The time zone rule');
+  if (typeof f.tz?.posix !== 'string' || f.tz.posix === '') {
+    issues.push({ path: 'tz.posix', message: "The gadget has no rule for this time zone. Pick the zone again from the list, or choose another one." });
+  } else tooLong(issues, 'tz.posix', f.tz.posix, L.tzMax, 'The time zone rule');
   return issues;
 }

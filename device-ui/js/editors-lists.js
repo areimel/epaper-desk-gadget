@@ -78,7 +78,7 @@ export function notesEditor(app) {
     fl.wrap.querySelector('label').append(counter(text, L.noteTextMax, F.utf8Bytes));
     const check = (key, label, checked, disabled) => h('label', { class: 'check' },
       h('input', {
-        type: 'checkbox', checked, disabled,
+        type: 'checkbox', id: `${fieldId(`notes.lines[${i}]`)}-${key}`, checked, disabled,
         onchange: (e) => {
           const on = e.target.checked;
           app.update((d) => F.editNoteLine(d, i, { [key]: on }), { rerender: key === 'todo' ? 'editor' : '' });

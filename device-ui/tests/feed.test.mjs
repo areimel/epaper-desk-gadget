@@ -142,3 +142,31 @@ test('pageOn and calendarState helpers', () => {
   assert.equal(F.calendarState(F.setCalendarUrl(fixture, 'https://x')), 'new');
   assert.equal(F.calendarState(F.setCalendarUrl({ ...fixture, calendar: { set: true } }, '')), 'removing');
 });
+
+test('toPutBody lower-cases the calendar scheme only', () => {
+  const put = (url) => F.toPutBody({ ...fixture, calendar: { set: false, url } }).calendar.url;
+  assert.equal(put('HTTPS://Example.com/A.ics?X=1'), 'https://Example.com/A.ics?X=1');
+  assert.equal(put('WebCal://example.com/a'), 'webcal://example.com/a');
+  assert.equal(put('https://ok'), 'https://ok');
+  assert.equal(put(''), '');
+});
+
+test('checkFeed rejects a missing time zone rule at the time zone field', () => {
+  for (const posix of [null, '', undefined]) {
+    const issues = F.checkFeed({ ...fixture, tz: { iana: 'Etc/UTC', posix } }, limits);
+    const i = issues.find((x) => x.path === 'tz.posix');
+    assert.ok(i, `posix ${posix}`);
+    assert.match(i.message, /time zone/i);
+  }
+  assert.equal(F.checkFeed(fixture, limits).some((x) => x.path === 'tz.posix'), false);
+});
+
+test('parseDwellMinutes accepts numbers and flags empty or non-numeric text', () => {
+  assert.deepEqual(F.parseDwellMinutes('5'), { sec: 300 });
+  assert.deepEqual(F.parseDwellMinutes(' 2.5 '), { sec: 150 });
+  for (const bad of ['', '   ', 'abc', '1e999', 'NaN']) {
+    const r = F.parseDwellMinutes(bad);
+    assert.equal(r.sec, undefined, bad);
+    assert.match(r.error, /minutes/);
+  }
+});

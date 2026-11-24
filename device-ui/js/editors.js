@@ -3,7 +3,7 @@ import { h, field } from './dom.js';
 import { fieldId, sourceLine, calendarSkippedLine } from './errors.js';
 import * as F from './feed.js';
 import { zoneNames, posixFor, browserZone } from './tz.js';
-import { searchPlaces } from './geocode.js';
+import { searchPlaces, latestOnly } from './geocode.js';
 import { PAGE_NAMES, paintScreen } from './queue.js';
 import { messagesEditor, notesEditor } from './editors-lists.js';
 
@@ -25,7 +25,7 @@ function clockEditor(app) {
   const select = h('select', {
     onchange: (e) => {
       const iana = e.target.value;
-      app.update((d) => F.setTz(d, iana, posixFor(iana)), { rerender: 'editor', clear: 'tz' });
+      app.update((d) => F.setTz(d, iana, posixFor(iana, app.saved.tz)), { rerender: 'editor', clear: 'tz' });
     },
   });
   const known = names.includes(f.tz.iana);
@@ -40,7 +40,8 @@ function clockEditor(app) {
   const use = here && here !== f.tz.iana
     ? h('button', {
         type: 'button', class: 'link',
-        onclick: () => app.update((d) => F.setTz(d, here, posixFor(here)), { rerender: 'editor', clear: 'tz' }),
+        onclick: () => app.update((d) => F.setTz(d, here, posixFor(here, app.saved.tz)),
+          { rerender: 'editor', clear: 'tz', focus: fieldId('tz.iana') }),
       }, `Use this browser's zone, ${here.replace(/_/g, ' ')}`)
     : null;
   return [wrap, use];
@@ -52,19 +53,22 @@ function weatherEditor(app) {
   const results = h('ul', { class: 'places', 'aria-live': 'polite' });
   const input = h('input', { type: 'search', autocomplete: 'off', enterkeyhint: 'search', placeholder: 'City name' });
   const status = h('p', { class: 'hint', role: 'status' });
+  const nextSearch = latestOnly();
   async function search(e) {
     e.preventDefault();
+    const current = nextSearch();
     status.textContent = 'Searching...';
     results.replaceChildren();
     try {
       const places = await searchPlaces(input.value, L.placeMax);
+      if (!current()) return; // a newer search owns the list
       status.textContent = places.length ? 'Pick your place:' : `No places called "${input.value.trim()}". Check the spelling or try a nearby city.`;
       results.replaceChildren(...places.map((p) => h('li', {}, h('button', {
         type: 'button', class: 'place',
         onclick: () => app.update((d) => F.setPlace(d, p), { rerender: 'editor', clear: 'weather' }),
       }, p.label))));
     } catch (err) {
-      status.textContent = err.message;
+      if (current()) status.textContent = err.message;
     }
   }
   const { wrap } = field({ id: fieldId('weather.place'), label: f.weather ? 'Change the place' : 'Find your city', input });
@@ -91,11 +95,20 @@ function calendarEditor(app, local) {
   if (state === 'saved' && !local.replacing) {
     out.push(h('p', { class: 'current' }, 'A calendar link is saved.'),
       h('div', { class: 'actions' },
-        h('button', { type: 'button', onclick: () => { local.replacing = true; app.rerender('editor'); } }, 'Replace link'),
-        h('button', { type: 'button', onclick: () => app.update((d) => F.setCalendarUrl(d, ''), rerender) }, 'Remove link')));
+        h('button', {
+          type: 'button', id: 'cal-replace',
+          onclick: () => { local.replacing = true; app.rerender('editor', fieldId('calendar.url')); },
+        }, 'Replace link'),
+        h('button', {
+          type: 'button', id: 'cal-remove',
+          onclick: () => app.update((d) => F.setCalendarUrl(d, ''), { ...rerender, focus: 'cal-keep' }),
+        }, 'Remove link')));
   } else if (state === 'removing') {
     out.push(h('p', { class: 'current' }, 'The saved link will be removed when you save changes.'),
-      h('button', { type: 'button', onclick: () => app.update((d) => F.undoCalendar(d), rerender) }, 'Keep the saved link'));
+      h('button', {
+        type: 'button', id: 'cal-keep',
+        onclick: () => app.update((d) => F.undoCalendar(d), { ...rerender, focus: 'cal-replace' }),
+      }, 'Keep the saved link'));
   } else {
     const input = h('input', {
       type: 'url', inputmode: 'url', autocomplete: 'off', spellcheck: false,
@@ -113,8 +126,8 @@ function calendarEditor(app, local) {
     out.push(wrap);
     if (f.calendar.set) {
       out.push(h('button', {
-        type: 'button', class: 'link',
-        onclick: () => { local.replacing = false; app.update((d) => F.undoCalendar(d), rerender); },
+        type: 'button', class: 'link', id: 'cal-keep',
+        onclick: () => { local.replacing = false; app.update((d) => F.undoCalendar(d), { ...rerender, focus: 'cal-replace' }); },
       }, 'Keep the saved link'));
     }
   }
@@ -132,6 +145,19 @@ const BUILDERS = {
 export const DIRTY_NOTE = 'The preview updates after you save changes.';
 const local = {}; // per-page view state (e.g. calendar "replacing"); never saved
 
+// After a save or a discard the saved state is the truth, so forget view state.
+export function resetEditorState() {
+  for (const k of Object.keys(local)) delete local[k];
+}
+
+// Repaint only the open editor's preview when its bitmap arrives, so typing
+// in the editor is not interrupted.
+export function paintEditorPreview(app, id) {
+  const canvas = document.getElementById('editor-canvas');
+  const root = document.getElementById('editor');
+  if (app.selected === id && canvas && root) paintScreen(canvas, app.screens.get(id), app.geom, Math.min(250, root.clientWidth || 358));
+}
+
 export function renderEditor(root, app) {
   const id = app.selected;
   if (!id) {
@@ -142,7 +168,7 @@ export function renderEditor(root, app) {
   local[id] ||= {};
   if (id === 'calendar' && F.calendarState(app.draft) === 'none') local[id].replacing = false;
   const on = F.pageOn(app.draft, id);
-  const canvas = h('canvas', { class: 'screen loading', width: 250, height: 122, role: 'img', 'aria-label': `Preview of the ${PAGE_NAMES[id]} page` });
+  const canvas = h('canvas', { id: 'editor-canvas', class: 'screen loading', width: 250, height: 122, role: 'img', 'aria-label': `Preview of the ${PAGE_NAMES[id]} page` });
   paintScreen(canvas, app.screens.get(id), app.geom, Math.min(250, root.clientWidth || 358));
   const clean = on ? 'In the rotation.' : 'Switched off, so it is not in the rotation.';
   root.hidden = false;

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { apiErrorFor, fieldId, sourceLine, calendarSkippedLine, ageText, pageForPath } from '../js/errors.js';
+import { apiErrorFor, fieldId, sourceLine, calendarSkippedLine, ageText, pageForPath, hasInput, fixMessage } from '../js/errors.js';
 
 test('pageForPath finds the page whose settings hold a field', () => {
   assert.equal(pageForPath('messages[3].text'), 'messages');
@@ -64,4 +64,22 @@ test('calendarSkippedLine is empty for zero and plural-aware otherwise', () => {
   assert.equal(calendarSkippedLine(0), '');
   assert.match(calendarSkippedLine(1), /^1 event today is left out/);
   assert.match(calendarSkippedLine(3), /^3 events today are left out/);
+});
+
+test('hasInput is false for paths with no input on screen', () => {
+  for (const p of ['messages', 'notes.lines', 'weather.lat', 'weather.lon']) assert.equal(hasInput(p), false, p);
+  for (const p of ['dwellSec', 'tz.iana', 'tz.posix', 'messages[0].text', 'notes.lines[1].text', 'weather.place', 'calendar.url']) {
+    assert.equal(hasInput(p), true, p);
+  }
+});
+
+test('fieldId maps the time zone rule to the time zone select', () => {
+  assert.equal(fieldId('tz.posix'), 'f-tz-iana');
+});
+
+test('fixMessage points at fields, or shows the message when none matches', () => {
+  const issues = [{ path: 'messages[0].text', message: 'Write a message.' }, { path: 'messages', message: 'Keep at most 40 messages.' }];
+  assert.equal(fixMessage(issues.slice(0, 1), hasInput), 'Fix the highlighted field before saving.');
+  assert.equal(fixMessage([issues[0], issues[0]], hasInput), 'Fix the 2 highlighted fields before saving.');
+  assert.equal(fixMessage(issues, hasInput), 'Keep at most 40 messages.');
 });
