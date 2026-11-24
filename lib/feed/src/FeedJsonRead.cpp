@@ -10,8 +10,20 @@ namespace {
 bool readTz(Check& c, JsonVariantConst v, FeedConfig& f) {
   JsonObjectConst o;
   if (!c.object(v, "tz", o)) return false;
-  return c.text(o["iana"], "tz.iana", "Time zone", 1, limits::TZ_MAX, f.tzIana) &&
-         c.text(o["posix"], "tz.posix", "Time zone", 1, limits::TZ_MAX, f.tzPosix);
+  if (!c.text(o["iana"], "tz.iana", "Time zone", 1, limits::TZ_MAX, f.tzIana) ||
+      !c.text(o["posix"], "tz.posix", "Time zone", 1, limits::TZ_MAX, f.tzPosix)) {
+    return false;
+  }
+  // The POSIX string goes to setenv("TZ"): allow only what such strings are made of, and require
+  // an offset digit ("UTC0", "EST5EDT,M3.2.0,M11.1.0", "<+03>-3").
+  bool digit = false;
+  for (const char* p = f.tzPosix; *p; p++) {
+    const bool letter = (*p >= 'A' && *p <= 'Z') || (*p >= 'a' && *p <= 'z');
+    const bool number = *p >= '0' && *p <= '9';
+    digit = digit || number;
+    if (!letter && !number && !strchr("<>+-,./:", *p)) return c.fail("tz.posix", "Choose a time zone from the list.");
+  }
+  return digit || c.fail("tz.posix", "Choose a time zone from the list.");
 }
 
 bool readPages(Check& c, JsonVariantConst v, FeedConfig& f) {
@@ -82,10 +94,15 @@ bool readCalendar(Check& c, JsonVariantConst v, const FeedConfig& current, FeedC
   if (u.isNull()) return true;
   if (!c.text(u, "calendar.url", "The link", 0, limits::URL_MAX, f.calendarUrl)) return false;
   const char* s = f.calendarUrl;
-  if (*s && strncmp(s, "https://", 8) != 0 && strncmp(s, "webcal://", 9) != 0) {
-    return c.fail("calendar.url", "The link must start with https:// or webcal://.");
-  }
-  return true;
+  if (!*s) return true;  // "" removes the link
+  const size_t scheme = strncmp(s, "https://", 8) == 0 ? 8 : strncmp(s, "webcal://", 9) == 0 ? 9 : 0;
+  if (!scheme) return c.fail("calendar.url", "The link must start with https:// or webcal://.");
+  // A plain host and path only: no spaces or control bytes, no user:password@ part.
+  const char* host = s + scheme;
+  const size_t hostLen = strcspn(host, "/?#");
+  bool plain = hostLen > 0 && !memchr(host, '@', hostLen);
+  for (const char* p = s; *p && plain; p++) plain = static_cast<unsigned char>(*p) > 0x20 && *p != 0x7F;
+  return plain || c.fail("calendar.url", "That does not look like a calendar link.");
 }
 
 bool readMessages(Check& c, JsonVariantConst v, FeedConfig& f) {
@@ -159,10 +176,11 @@ bool readRoot(Check& c, JsonVariantConst root, const FeedConfig& current, FeedCo
 
 }  // namespace
 
-Result fromJson(const char* json, size_t n, const FeedConfig& current, FeedConfig& out, ArduinoJson::Allocator* alloc) {
+Result fromJson(const char* json, size_t n, const FeedConfig& current, FeedConfig& out, ArduinoJson::Allocator* alloc,
+                size_t maxBytes) {
   Result r = {true, "", ""};
   Check c{r};
-  if (n > limits::FEED_JSON_MAX) {
+  if (n > maxBytes) {
     c.fail("", "Feed is too large.");
     return r;
   }

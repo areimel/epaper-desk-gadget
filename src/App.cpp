@@ -123,9 +123,13 @@ uint16_t calendarSkipped() { return cal.skipped; }
 namespace app {
 void begin() {
   panel::begin();
-  if (!feedfile::begin() || !feedfile::load(config)) {
+  const feedfile::Load loaded = feedfile::begin() ? feedfile::load(config) : feedfile::Load::Unreadable;
+  if (loaded != feedfile::Load::Ok) {
     firstBootFeed();
-    if (!feedfile::save(config)) LOG_W("app: the feed could not be stored; changes will not survive a restart");
+    // Only replace the file when there is none (or it was set aside as invalid). After a read
+    // failure the stored feed may be fine, so it is left alone and defaults are used until restart.
+    if (loaded == feedfile::Load::Missing && !feedfile::save(config)) LOG_W("app: the default feed could not be stored");
+    if (loaded == feedfile::Load::Unreadable) LOG_W("app: stored feed not read; using defaults until restart");
   }
   net::beginClock(config.tzPosix);
   net::onFeedChanged(config);
@@ -145,7 +149,8 @@ void update(uint32_t now) {
     redraw = wantFull = true;
   }
   // `|`, not `||`: every source's "changed" flag must be consumed.
-  if (net::copyWeather(weather) | net::copyHn(hn) | net::copyCalendar(cal)) redraw = wantFull = true;
+  // New data only asks for a comparison: the panel refreshes if the pixels really changed.
+  if (net::copyWeather(weather) | net::copyHn(hn) | net::copyCalendar(cal)) redraw = true;
   if (rotation.tick(now)) redraw = wantFull = true;
   if (addressShown && static_cast<int32_t>(addressUntil - now) <= 0) redraw = wantFull = true;
   if (!everConnected && !joinHintShown && now >= JOIN_PATIENCE_MS) joinHintShown = redraw = true;

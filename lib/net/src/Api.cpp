@@ -3,6 +3,7 @@
 #if FEATURE_DASHBOARD
 #include <ArduinoJson.h>
 #include <ESPmDNS.h>
+#include <uri/UriGlob.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -31,6 +32,7 @@ constexpr size_t ABORT_BODY_OVER = 4 * limits::FEED_JSON_MAX;  // drop the conne
 struct Body {
   char* buf = nullptr;
   size_t len = 0;
+  size_t cap = 0;  // this route's limit, for the 413 message
   bool tooLarge = false;
   bool noMemory = false;
 } body;
@@ -45,6 +47,7 @@ void collect(size_t cap) {
   if (raw.status == RAW_START) {
     freeBody();
     const int declared = srv.clientContentLength();
+    body.cap = cap;
     body.tooLarge = declared < 0 || static_cast<size_t>(declared) > cap;
     if (body.tooLarge && static_cast<size_t>(declared) > ABORT_BODY_OVER) {
       net::api::sendError(413, "The request body is too large.");
@@ -70,7 +73,7 @@ void collect(size_t cap) {
 bool bodyOk() {
   if (body.tooLarge) {
     char msg[64];
-    snprintf(msg, sizeof msg, "The request is larger than %u bytes.", static_cast<unsigned>(limits::FEED_JSON_MAX));
+    snprintf(msg, sizeof msg, "The request is larger than %u bytes.", static_cast<unsigned>(body.cap));
     net::api::sendError(413, msg);
   } else if (body.noMemory) {
     net::api::sendError(500, "The device is out of memory. Try again.");
@@ -145,6 +148,7 @@ void refresh() {
 }
 
 void notFound() {
+  freeBody();
   const String& uri = srv.uri();
   const bool get = srv.method() == HTTP_GET || srv.method() == HTTP_HEAD;
   if (get && !uri.startsWith("/api/") && net::api::serveStatic(uri.c_str())) return;
@@ -160,6 +164,9 @@ void startServer() {
   srv.on("/api/screen", HTTP_GET, net::api::handleScreen);
   srv.on("/api/show", HTTP_POST, show, [] { collect(SHOW_BODY_MAX); });
   srv.on("/api/refresh", HTTP_POST, refresh, [] { collect(0); });
+  // Catch-all, registered last: without a raw handler the server would buffer a body of any
+  // declared size for an unknown route or method. Here it is never kept.
+  srv.on(UriGlob("/*"), HTTP_ANY, notFound, [] { collect(0); });
   srv.onNotFound(notFound);
   srv.begin();
   // With OTA compiled in, ArduinoOTA.begin() already started mDNS under the same hostname and
@@ -195,7 +202,7 @@ void sendError(int code, const char* error, const char* path) {
   JsonDocument doc;
   doc["error"] = error ? error : "";
   doc["path"] = path ? path : "";
-  char out[160];
+  char out[448];  // path (47) and error (63) with every byte escaped as \\uXXXX still fit
   const size_t n = serializeJson(doc, out, sizeof out);
   sendJson(code, out, n);
 }

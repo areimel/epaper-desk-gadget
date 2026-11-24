@@ -16,8 +16,10 @@ struct Result {
 // Parses and validates a whole feed document. `current` supplies the stored calendar link when
 // the document omits it. On failure `out` is left exactly as it was. `alloc` is only for tests
 // that measure heap use; nullptr uses the default (malloc). Not thread-safe (see FeedJsonRead.cpp).
+// maxBytes is the largest document accepted: FEED_JSON_MAX for a request; the stored file may be
+// URL_MAX longer because it carries the calendar link.
 Result fromJson(const char* json, size_t n, const FeedConfig& current, FeedConfig& out,
-                ArduinoJson::Allocator* alloc = nullptr);
+                ArduinoJson::Allocator* alloc = nullptr, size_t maxBytes = limits::FEED_JSON_MAX);
 
 // Writes the feed as JSON. redact = true is the API shape ("calendar":{"set":bool}); redact =
 // false is the storage shape ("calendar":{"url":"..."}). Returns bytes written (excluding the

@@ -72,12 +72,12 @@ bool begin() {
   return mounted;
 }
 
-bool load(FeedConfig& out) {
-  if (!mounted) return false;
+Load load(FeedConfig& out) {
+  if (!mounted) return Load::Unreadable;
   recoverTmp();
   if (!LittleFS.exists(FEED)) {
     LOG_I("feedfile: no %s", FEED);
-    return false;
+    return Load::Missing;
   }
   size_t n = 0;
   const char* why = nullptr;
@@ -85,20 +85,21 @@ bool load(FeedConfig& out) {
   if (!buf) {
     if (why) quarantine(why);
     else LOG_E("feedfile: no memory to read %s", FEED);
-    return false;
+    return why ? Load::Missing : Load::Unreadable;
   }
   // The stored shape carries its own calendar link, so `out` serves as `current` too;
-  // fromJson only writes `out` after the whole document validated.
-  const feed::Result r = feed::fromJson(buf, n, out, out);
+  // fromJson only writes `out` after the whole document validated. The stored shape may be up
+  // to URL_MAX bytes longer than the largest accepted request, hence FILE_MAX.
+  const feed::Result r = feed::fromJson(buf, n, out, out, nullptr, FILE_MAX);
   free(buf);
   if (!r.ok) {
     // Path and reason only: never the value, which may be the calendar link.
     LOG_W("feedfile: invalid at '%s': %s", r.path, r.error);
     quarantine("invalid");
-    return false;
+    return Load::Missing;
   }
   LOG_I("feedfile: loaded %u bytes", static_cast<unsigned>(n));
-  return true;
+  return Load::Ok;
 }
 
 bool save(const FeedConfig& feed) {

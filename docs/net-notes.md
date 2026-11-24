@@ -165,3 +165,18 @@ from `limits::HN_PER_VISIT`; the two bools need two `StateInfo` fields and two h
 4. mDNS together with ArduinoOTA; `desk-gadget.local` resolving.
 5. Improv "Visit device" URL in the installer; NTP sync time; `onFeedChanged` zone switch.
 6. `/api/screen` bytes matching the panel (depends on `Canvas` and the hooks).
+
+## Changes after the code review
+
+- New data no longer forces a panel refresh: `App.cpp` re-composes the screen and refreshes
+  only if the pixels differ.
+- A catch-all route with a zero-byte body cap is registered last, so a body sent to an unknown
+  route or method is never buffered. Not covered: `multipart/*` bodies, which the core parses
+  on its own path; their memory bound has not been checked.
+- `feedfile::load` returns `Ok`, `Missing` or `Unreadable`. Defaults are written only for
+  `Missing`, so a boot-time memory or storage failure cannot overwrite a good feed.
+- The stored feed may be up to `URL_MAX` bytes longer than the largest request; `load` passes
+  that larger limit to `feed::fromJson`, so a feed that saved can always be loaded.
+- `tz.posix` is limited to the characters a POSIX zone string uses, and a calendar link must
+  have a host, no `user:password@` part, and no spaces or control bytes.
+- A calendar result computed while the time zone changed is discarded.

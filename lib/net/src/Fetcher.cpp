@@ -150,11 +150,17 @@ void fetchOne(uint8_t i, const char* url) {
   const Source& src = SOURCES[i];
   const uint32_t start = millis();
   net::GetResult r{};
+  char zone[limits::TZ_MAX + 1];  // "today" and event zones depend on it
+  {
+    Guard g;
+    memcpy(zone, tzIana, sizeof zone);
+  }
   const bool ok = src.run(url, r);
   bool kept = true;
   {
     Guard g;
-    kept = strcmp(url, shared[i].url) == 0;  // settings changed mid-fetch: the result is stale
+    // Settings changed mid-fetch: the result is stale (for the calendar, a zone change too).
+    kept = strcmp(url, shared[i].url) == 0 && (i != CALENDAR || strcmp(zone, tzIana) == 0);
     if (kept) {
       if (ok) src.publish();
       fetch::record(*src.status, ok, r.error, time(nullptr));

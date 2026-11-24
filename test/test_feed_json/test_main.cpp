@@ -125,6 +125,7 @@ static void fillFull(FeedConfig& f) {
   f.dwellSec = limits::DWELL_MAX_S;
   memset(f.tzIana, 'i', limits::TZ_MAX);
   memset(f.tzPosix, 'p', limits::TZ_MAX);
+  f.tzPosix[limits::TZ_MAX - 1] = '0';  // a zone string needs an offset digit
   f.pages[0] = {PageId::Notes, true};
   f.pages[5] = {PageId::Clock, false};
   f.weather.set = true;
