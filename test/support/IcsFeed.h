@@ -100,10 +100,28 @@ inline Result parseAllWays(const uint8_t* data, size_t n, time_t now, const char
   return whole;
 }
 
+// Rewrites line endings: every CR is dropped, then (crlf) each LF becomes CRLF.
+inline size_t withEndings(const uint8_t* in, size_t n, uint8_t* out, size_t cap, bool crlf) {
+  size_t k = 0;
+  for (size_t i = 0; i < n; i++) {
+    if (in[i] == '\r') continue;
+    if (in[i] == '\n' && crlf && k < cap) out[k++] = '\r';
+    if (k < cap) out[k++] = in[i];
+  }
+  return k;
+}
+
+// A fixture parsed all ways, both with LF and with CRLF line endings (git may normalise the
+// committed files, so both forms are produced here); all results must agree.
 inline Result fixture(const char* name, time_t now, const char* tz) {
+  static uint8_t converted[2 * FIXTURE_MAX];
   size_t n;
   const uint8_t* data = load(name, n);
-  return parseAllWays(data, n, now, tz);
+  size_t lf = withEndings(data, n, converted, sizeof converted, false);
+  Result r = parseAllWays(converted, lf, now, tz);
+  size_t crlf = withEndings(data, n, converted, sizeof converted, true);
+  assertSame(r, parseAllWays(converted, crlf, now, tz), "CRLF and LF differ");
+  return r;
 }
 
 inline void expectEvent(const CalSnap& s, uint8_t i, const char* title, int startMin, int endMin) {
