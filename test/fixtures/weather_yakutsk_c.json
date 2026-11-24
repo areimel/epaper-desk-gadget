@@ -1,0 +1,64 @@
+{
+    "latitude": 62.038662,
+    "longitude": 129.62688,
+    "generationtime_ms": 0.2884864807128906,
+    "utc_offset_seconds": 32400,
+    "timezone": "Asia/Yakutsk",
+    "timezone_abbreviation": "GMT+9",
+    "elevation": 102.0,
+    "current_units": {
+        "time": "iso8601",
+        "interval": "seconds",
+        "temperature_2m": "\u00b0C",
+        "apparent_temperature": "\u00b0C",
+        "weather_code": "wmo code",
+        "is_day": ""
+    },
+    "current": {
+        "time": "2026-11-24T09:00",
+        "interval": 900,
+        "temperature_2m": -31.2,
+        "apparent_temperature": -36.0,
+        "weather_code": 3,
+        "is_day": 1
+    },
+    "daily_units": {
+        "time": "iso8601",
+        "weather_code": "wmo code",
+        "temperature_2m_max": "\u00b0C",
+        "temperature_2m_min": "\u00b0C",
+        "precipitation_probability_max": "%"
+    },
+    "daily": {
+        "time": [
+            "2026-11-24",
+            "2026-11-25",
+            "2026-11-26",
+            "2026-11-27"
+        ],
+        "weather_code": [
+            71,
+            71,
+            2,
+            3
+        ],
+        "temperature_2m_max": [
+            -24.1,
+            -24.1,
+            -28.4,
+            -27.6
+        ],
+        "temperature_2m_min": [
+            -34.7,
+            -31.3,
+            -32.1,
+            -31.3
+        ],
+        "precipitation_probability_max": [
+            86,
+            49,
+            0,
+            0
+        ]
+    }
+}
