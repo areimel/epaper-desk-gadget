@@ -24,6 +24,7 @@ void render(PageId page, const PageContext& ctx, Canvas& canvas) {
     case PageId::Weather: renderWeather(ctx, canvas); break;
     case PageId::Hn: renderHn(ctx, canvas); break;
     case PageId::Messages: renderMessages(ctx, canvas); break;
+    case PageId::Calendar: renderCalendar(ctx, canvas); break;
     case PageId::Notes: renderNotes(ctx, canvas); break;
   }
 }
