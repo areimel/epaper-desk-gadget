@@ -11,6 +11,9 @@
 #   ota       enabled; needs wifi.enabled: true and ota_password in secrets.yaml,
 #             otherwise it is left out of the build with a warning
 #   gestures  debounce_ms < double_click_ms < long_press_ms
+#   dashboard enabled (needs wifi.enabled: true), dwell_s (seconds per page),
+#             messages (starter messages: text, optional by). Limits come from
+#             lib/feed/src/Limits.h; the build fails with the key path if exceeded
 #   schema    optional path to a .py module that adds project-specific sections
 
 project:
@@ -29,3 +32,40 @@ gestures:
   debounce_ms: 25
   double_click_ms: 250
   long_press_ms: 650
+
+dashboard:
+  enabled: true
+  # Seconds each page stays up. Range comes from lib/feed/src/Limits.h.
+  dwell_s: 300
+  # Starter messages shown until you edit them in the web app. Short, plain ASCII.
+  messages:
+    - {text: "Drink some water. Unclench your jaw.", by: "your desk"}
+    - {text: "Look at something far away for a moment.", by: "your desk"}
+    - {text: "Roll your shoulders back. Better.", by: "your desk"}
+    - {text: "You are doing better than you think.", by: "your desk"}
+    - {text: "Stand up. The chair will keep your place.", by: "your desk"}
+    - {text: "One small thing, then another small thing.", by: "your desk"}
+    - {text: "It is fine to take a break before you need one.", by: "your desk"}
+    - {text: "Check your posture. Yes, now.", by: "your desk"}
+    - {text: "Breathe in slowly. Out slower.", by: "your desk"}
+    - {text: "The tab you are avoiding is smaller than it looks.", by: "your desk"}
+    - {text: "A snack is a perfectly good plan.", by: "your desk"}
+    - {text: "Done is a fine place to be.", by: "your desk"}
+    - {text: "Reply to the easy message first. Momentum counts.", by: "your desk"}
+    - {text: "Your future self says thanks for the tidy desk.", by: "your desk"}
+    - {text: "Open a window if you can. Fresh air is free.", by: "your desk"}
+    - {text: "Be as kind to yourself as you are to a friend.", by: "your desk"}
+    - {text: "Nobody has read all their email. You are not behind.", by: "your desk"}
+    - {text: "Stretch your wrists. They have been busy.", by: "your desk"}
+    - {text: "Write it down so your brain can let go of it.", by: "your desk"}
+    - {text: "It is okay to finish tomorrow.", by: "your desk"}
+    - {text: "Plants and people both like a little sun.", by: "your desk"}
+    - {text: "Proud of you for showing up today.", by: "your desk"}
+    - {text: "Good enough, shipped, beats perfect, pending.", by: "your desk"}
+    - {text: "Take the stairs, or just walk to the kitchen.", by: "your desk"}
+    - {text: "Hope is the thing with feathers.", by: "Emily Dickinson"}
+    - {text: "Simplicity, simplicity, simplicity!", by: "Henry David Thoreau"}
+    - {text: "I'm not afraid of storms, for I'm learning how to sail my ship.", by: "Louisa May Alcott"}
+    - {text: "To see a world in a grain of sand.", by: "William Blake"}
+    - {text: "A journey of a thousand miles begins with a single step.", by: "Lao Tzu"}
+    - {text: "Fall seven times, stand up eight.", by: "Japanese proverb"}
