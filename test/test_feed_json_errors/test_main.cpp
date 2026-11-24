@@ -180,31 +180,21 @@ void test_pages() {
 }
 
 void test_weather() {
-  mk(0, 0, 0, 0, "\"rain\"", 0, 0, 0);
-  expectFail("weather");
-  mk(0, 0, 0, 0, "{\"lat\":1,\"lon\":2,\"units\":\"c\"}", 0, 0, 0);
-  expectFail("weather.place");
-  mk(0, 0, 0, 0, "{\"place\":\"\",\"lat\":1,\"lon\":2,\"units\":\"c\"}", 0, 0, 0);
-  expectFail("weather.place");
-  mk(0, 0, 0, 0, "{\"place\":\"X\",\"lat\":90.5,\"lon\":2,\"units\":\"c\"}", 0, 0, 0);
-  expectFail("weather.lat");
-  mk(0, 0, 0, 0, "{\"place\":\"X\",\"lat\":1,\"lon\":-180.1,\"units\":\"c\"}", 0, 0, 0);
-  expectFail("weather.lon");
-  mk(0, 0, 0, 0, "{\"place\":\"X\",\"lat\":\"1\",\"lon\":2,\"units\":\"c\"}", 0, 0, 0);
-  expectFail("weather.lat");
-  mk(0, 0, 0, 0, "{\"place\":\"X\",\"lat\":1,\"lon\":2,\"units\":\"k\"}", 0, 0, 0);
-  expectFail("weather.units");
+  mk(0, 0, 0, 0, "\"rain\"", 0, 0, 0); expectFail("weather");
+  mk(0, 0, 0, 0, "{\"lat\":1,\"lon\":2,\"units\":\"c\"}", 0, 0, 0); expectFail("weather.place");
+  mk(0, 0, 0, 0, "{\"place\":\"\",\"lat\":1,\"lon\":2,\"units\":\"c\"}", 0, 0, 0); expectFail("weather.place");
+  mk(0, 0, 0, 0, "{\"place\":\"X\",\"lat\":90.5,\"lon\":2,\"units\":\"c\"}", 0, 0, 0); expectFail("weather.lat");
+  mk(0, 0, 0, 0, "{\"place\":\"X\",\"lat\":1,\"lon\":-180.1,\"units\":\"c\"}", 0, 0, 0); expectFail("weather.lon");
+  mk(0, 0, 0, 0, "{\"place\":\"X\",\"lat\":\"1\",\"lon\":2,\"units\":\"c\"}", 0, 0, 0); expectFail("weather.lat");
+  mk(0, 0, 0, 0, "{\"place\":\"X\",\"lat\":1,\"lon\":2,\"units\":\"k\"}", 0, 0, 0); expectFail("weather.units");
   mk(0, 0, 0, 0, "{\"place\":\"X\",\"lat\":90,\"lon\":-180,\"units\":\"f\"}", 0, 0, 0);  // edges are fine
   TEST_ASSERT_TRUE(valid());
 }
 
 void test_calendar() {
-  mk(0, 0, 0, 0, 0, "\"https://x\"", 0, 0);
-  expectFail("calendar");
-  mk(0, 0, 0, 0, 0, "{\"url\":\"http://x.example/\"}", 0, 0);
-  expectFail("calendar.url", "https:// or webcal://");
-  mk(0, 0, 0, 0, 0, "{\"url\":5}", 0, 0);
-  expectFail("calendar.url");
+  mk(0, 0, 0, 0, 0, "\"https://x\"", 0, 0); expectFail("calendar");
+  mk(0, 0, 0, 0, 0, "{\"url\":\"http://x.example/\"}", 0, 0); expectFail("calendar.url", "https:// or webcal://");
+  mk(0, 0, 0, 0, 0, "{\"url\":5}", 0, 0); expectFail("calendar.url");
   static char cal[400];
   strcpy(cal, "{\"url\":\"https://");
   memset(cal + strlen(cal), 'a', limits::URL_MAX - 7);  // 8 + (URL_MAX-7) = URL_MAX + 1
@@ -214,18 +204,12 @@ void test_calendar() {
 }
 
 void test_messages() {
-  mk(0, 0, 0, 0, 0, 0, "{}", 0);
-  expectFail("messages");
-  mk(0, 0, 0, 0, 0, 0, "[\"hi\"]", 0);
-  expectFail("messages[0]");
-  mk(0, 0, 0, 0, 0, 0, "[{\"text\":\"ok\"},{\"by\":\"me\"}]", 0);
-  expectFail("messages[1].text");
-  mk(0, 0, 0, 0, 0, 0, "[{\"text\":\"\"}]", 0);
-  expectFail("messages[0].text");
-  mk(0, 0, 0, 0, 0, 0, "[{\"text\":7}]", 0);
-  expectFail("messages[0].text");
-  mk(0, 0, 0, 0, 0, 0, "[{\"text\":\"a\",\"by\":3}]", 0);
-  expectFail("messages[0].by");
+  mk(0, 0, 0, 0, 0, 0, "{}", 0); expectFail("messages");
+  mk(0, 0, 0, 0, 0, 0, "[\"hi\"]", 0); expectFail("messages[0]");
+  mk(0, 0, 0, 0, 0, 0, "[{\"text\":\"ok\"},{\"by\":\"me\"}]", 0); expectFail("messages[1].text");
+  mk(0, 0, 0, 0, 0, 0, "[{\"text\":\"\"}]", 0); expectFail("messages[0].text");
+  mk(0, 0, 0, 0, 0, 0, "[{\"text\":7}]", 0); expectFail("messages[0].text");
+  mk(0, 0, 0, 0, 0, 0, "[{\"text\":\"a\",\"by\":3}]", 0); expectFail("messages[0].by");
   static char m[400];
   snprintf(m, sizeof m, "[{\"text\":\"a\"},{\"text\":\"a\"},{\"text\":\"a\"},{\"text\":\"%.*s\"}]",
            (int)limits::MESSAGE_TEXT_MAX + 1,
@@ -249,20 +233,13 @@ void test_too_many_messages() {
 }
 
 void test_notes() {
-  mk(0, 0, 0, 0, 0, 0, 0, "[]");
-  expectFail("notes");
-  mk(0, 0, 0, 0, 0, 0, 0, "{\"lines\":[]}");
-  expectFail("notes.title");
-  mk(0, 0, 0, 0, 0, 0, 0, "{\"title\":\"This title is longer than 24 bytes\",\"lines\":[]}");
-  expectFail("notes.title", "too long");
-  mk(0, 0, 0, 0, 0, 0, 0, "{\"title\":\"\"}");
-  expectFail("notes.lines");
-  mk(0, 0, 0, 0, 0, 0, 0, "{\"title\":\"\",\"lines\":[{\"text\":\"a\",\"todo\":true}]}");
-  expectFail("notes.lines[0].done");
-  mk(0, 0, 0, 0, 0, 0, 0, "{\"title\":\"\",\"lines\":[{\"text\":\"a\",\"done\":false}]}");
-  expectFail("notes.lines[0].todo");
-  mk(0, 0, 0, 0, 0, 0, 0, "{\"title\":\"\",\"lines\":[{\"text\":\"\",\"todo\":false,\"done\":false}]}");
-  expectFail("notes.lines[0].text");
+  mk(0, 0, 0, 0, 0, 0, 0, "[]"); expectFail("notes");
+  mk(0, 0, 0, 0, 0, 0, 0, "{\"lines\":[]}"); expectFail("notes.title");
+  mk(0, 0, 0, 0, 0, 0, 0, "{\"title\":\"This title is longer than 24 bytes\",\"lines\":[]}"); expectFail("notes.title", "too long");
+  mk(0, 0, 0, 0, 0, 0, 0, "{\"title\":\"\"}"); expectFail("notes.lines");
+  mk(0, 0, 0, 0, 0, 0, 0, "{\"title\":\"\",\"lines\":[{\"text\":\"a\",\"todo\":true}]}"); expectFail("notes.lines[0].done");
+  mk(0, 0, 0, 0, 0, 0, 0, "{\"title\":\"\",\"lines\":[{\"text\":\"a\",\"done\":false}]}"); expectFail("notes.lines[0].todo");
+  mk(0, 0, 0, 0, 0, 0, 0, "{\"title\":\"\",\"lines\":[{\"text\":\"\",\"todo\":false,\"done\":false}]}"); expectFail("notes.lines[0].text");
   mk(0, 0, 0, 0, 0, 0, 0,
      "{\"title\":\"\",\"lines\":[{\"text\":\"a\",\"todo\":false,\"done\":false},{\"text\":\"a\",\"todo\":false,"
      "\"done\":false},{\"text\":\"a\",\"todo\":false,\"done\":false},{\"text\":\"a\",\"todo\":false,\"done\":false},"
@@ -281,16 +258,12 @@ void test_bytes_not_characters_and_control_chars() {
      "{\"title\":\"\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\","
      "\"lines\":[]}");
   TEST_ASSERT_TRUE(valid());
-  mk(0, 0, 0, 0, 0, 0, "[{\"text\":\"a\\u0000b\"}]", 0);
-  expectFail("messages[0].text");
-  mk(0, 0, 0, 0, 0, 0, "[{\"text\":\"a\\nb\"}]", 0);
-  expectFail("messages[0].text");
-  mk(0, 0, 0, 0, 0, 0, "[{\"text\":\"ok\",\"by\":\"a\\tb\"}]", 0);
-  expectFail("messages[0].by");
+  mk(0, 0, 0, 0, 0, 0, "[{\"text\":\"a\\u0000b\"}]", 0); expectFail("messages[0].text");
+  mk(0, 0, 0, 0, 0, 0, "[{\"text\":\"a\\nb\"}]", 0); expectFail("messages[0].text");
+  mk(0, 0, 0, 0, 0, 0, "[{\"text\":\"ok\",\"by\":\"a\\tb\"}]", 0); expectFail("messages[0].by");
   mk(0, 0, "{\"iana\":\"U\\u0001TC\",\"posix\":\"UTC0\"}", 0, 0, 0, 0, 0);
   expectFail("tz.iana");
-  mk(0, 0, 0, 0, 0, "{\"url\":\"https://a\\u001f\"}", 0, 0);
-  expectFail("calendar.url");
+  mk(0, 0, 0, 0, 0, "{\"url\":\"https://a\\u001f\"}", 0, 0); expectFail("calendar.url");
 }
 
 int main() {
