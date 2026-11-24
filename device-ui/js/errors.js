@@ -57,6 +57,12 @@ export function sourceLine(id, src, now) {
   }
 }
 
+// Which page's settings hold the field a path names ("" when none does).
+export function pageForPath(path) {
+  const top = (path || '').split(/[.[]/)[0];
+  return { tz: 'clock', weather: 'weather', calendar: 'calendar', messages: 'messages', notes: 'notes' }[top] || '';
+}
+
 export function calendarSkippedLine(n) {
   if (!n) return '';
   const one = n === 1;

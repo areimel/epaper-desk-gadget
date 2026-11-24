@@ -1,6 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { apiErrorFor, fieldId, sourceLine, calendarSkippedLine, ageText } from '../js/errors.js';
+import { apiErrorFor, fieldId, sourceLine, calendarSkippedLine, ageText, pageForPath } from '../js/errors.js';
+
+test('pageForPath finds the page whose settings hold a field', () => {
+  assert.equal(pageForPath('messages[3].text'), 'messages');
+  assert.equal(pageForPath('notes.lines[0].done'), 'notes');
+  assert.equal(pageForPath('tz.posix'), 'clock');
+  assert.equal(pageForPath('weather'), 'weather');
+  assert.equal(pageForPath('dwellSec'), '');
+  assert.equal(pageForPath(''), '');
+});
 
 test('400 keeps the server copy and its path', () => {
   const e = apiErrorFor(400, { error: 'Message 4 is 152 bytes; the limit is 140.', path: 'messages[3].text' });
