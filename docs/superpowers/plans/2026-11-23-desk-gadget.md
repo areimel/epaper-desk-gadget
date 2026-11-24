@@ -90,7 +90,7 @@ below and the contract headers, before its builders start.
 
 **Owner:** orchestrator.
 
-**Files (create):** `lib/feed/src/Limits.h`, `lib/feed/src/FeedConfig.h`, `lib/sources/src/Snapshots.h`, `lib/sources/src/ByteSink.h`, `lib/text/src/Measure.h`, `lib/epaper/src/Fonts.h`, `docs/api.md`, `device-ui/mock/fixtures/{state,feed}.json`
+**Files (create):** `lib/feed/src/Limits.h`, `lib/feed/src/FeedConfig.h`, `lib/sources/src/Snapshots.h`, `lib/sources/src/ByteSink.h`, `lib/text/src/Font.h`, `lib/text/src/Measure.h`, `lib/epaper/src/Fonts.{h,cpp}`, `docs/api.md`, `device-ui/mock/fixtures/{state,feed}.json`
 
 **Decisions these files carry:**
 
@@ -111,7 +111,8 @@ below and the contract headers, before its builders start.
 - `Snapshots.h`: `enum class SourceState : uint8_t { Never, Ok, Stale, Error }`; `struct SourceStatus { SourceState state; time_t updated; char error[32]; }`; `WeatherSnap` (now: `tempNow`, `feels`, `hi`, `lo` as `int16_t` whole degrees, `rainPct`, WMO `code`, `isDay`; `days[FORECAST_DAYS]` with `wday`, `hi`, `lo`, `code`); `HnSnap` (`count`, `stories[HN_STORIES]` with `title`, `points`, `comments`); `CalSnap` (`count`, `events[CAL_EVENTS_MAX]` with `title`, `startMin` (-1 = all day), `endMin`; `skipped`). Each has a `SourceStatus status`.
 - `ByteSink`: `struct ByteSink { virtual bool write(const uint8_t* data, size_t n) = 0; }` (return false to abort the download). Only the ICS parser needs it; weather and HN bodies are small and parsed from a bounded buffer.
 - Time: pure code takes `time_t now` as a parameter and uses libc `localtime_r`/`mktime`; native tests set `TZ` with `setenv` + `tzset`.
-- `Fonts.h`: `enum class Font : uint8_t { Small, SmallBold, Body, BodyBold, Quote14, Quote18, Num32, NumBig }` mapped to `helvR08`, `helvB08`, `helvR10`, `helvB10`, `ncenB14`, `ncenB18`, `logisoso32_tn`, `logisoso42_tn`; `const uint8_t* fontData(Font)`; `int lineHeight(Font)`.
+- `lib/text/src/Font.h` (pure): `enum class Font : uint8_t { Small, SmallBold, Body, BodyBold, Quote14, Quote18, Num32, NumBig }`. `lib/epaper/src/Fonts.h` maps them to `helvR08`, `helvB08`, `helvR10`, `helvB10`, `ncenB14`, `ncenB18`, `logisoso32_tn`, `logisoso42_tn`: `fonts::data(Font)`, `fonts::ascent(Font)`, `fonts::lineHeight(Font)`.
+- As built, the headers are the contract where they differ from this list: `feed::setDefaults(FeedConfig&)` replaces `feedDefaults()` (the struct is too big to return by value), `Panel` is a `panel::` namespace, and the panel in use is `e0213a367` (see `TODO.md`).
 - `Measure.h`: `struct Measure { virtual int width(Font f, const char* s, size_t n) const = 0; }`. `lib/text` wraps against this; Team A provides the U8g2-backed one, Team B tests with a fixed-width fake (6 px per char).
 - `docs/api.md`: the six routes from the spec with request/response JSON, status codes (`400 {"error":"...","path":"messages[3].text"}`, `413` over `FEED_JSON_MAX`), the `/api/screen` byte format, and the `/api/state` shape: `{"name","version","panel","ip","time","page","limits":{...},"sources":{"weather":{"state","updated","error"},...},"calendarSkipped","heapFree","refreshCount"}`.
 

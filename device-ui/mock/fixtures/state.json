@@ -1,0 +1,25 @@
+{
+  "name": "Desk Gadget",
+  "version": "0.1.0-dev",
+  "board": "Heltec Wireless Paper",
+  "ip": "192.168.1.50",
+  "host": "desk-gadget.local",
+  "time": 1795452060,
+  "timeSynced": true,
+  "page": "weather",
+  "screen": {"w": 250, "h": 122, "rowBytes": 32},
+  "limits": {
+    "dwellMin": 180, "dwellMax": 3600,
+    "messagesMax": 40, "messageTextMax": 140, "messageByMax": 32,
+    "noteLinesMax": 5, "noteTextMax": 40, "noteTitleMax": 24,
+    "urlMax": 256, "placeMax": 32, "tzMax": 48
+  },
+  "sources": {
+    "weather": {"state": "ok", "updated": 1795451400, "error": ""},
+    "hn": {"state": "stale", "updated": 1795448000, "error": "no network"},
+    "calendar": {"state": "never", "updated": 0, "error": ""}
+  },
+  "calendarSkipped": 0,
+  "heapFree": 182000,
+  "refreshCount": 12
+}
